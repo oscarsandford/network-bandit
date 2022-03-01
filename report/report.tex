@@ -1,0 +1,155 @@
+%%%%%%%% ICML 2020 EXAMPLE LATEX SUBMISSION FILE %%%%%%%%%%%%%%%%%
+\documentclass{article}
+
+% Recommended, but optional, packages for figures and better typesetting:
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{booktabs} % for professional tables
+
+% hyperref makes hyperlinks in the resulting PDF.
+% If your build breaks (sometimes temporarily if a hyperlink spans a page)
+% please comment out the following usepackage line and replace
+% \usepackage{icml2020} with \usepackage[nohyperref]{icml2020} above.
+\usepackage{hyperref}
+
+% Attempt to make hyperref and algorithmic work together better:
+\newcommand{\theHalgorithm}{\arabic{algorithm}}
+
+% Use the following line for the initial blind version submitted for review:
+% \usepackage{icml2021}
+\usepackage[accepted]{icml2021}
+
+% If accepted, instead use the following line for the camera-ready submission:
+%\usepackage[accepted]{icml2020}
+
+\usepackage{times}
+\usepackage{epsfig}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{comment}
+\newcommand{\nop}[1]{}
+
+% The \icmltitle you define below is probably too long as a header.
+% Therefore, a short form for the running title is supplied here:
+\icmltitlerunning{Multi-Armed Bandits for Optimizing New Peers in Peer-to-Peer Networks}
+
+\begin{document}
+
+\twocolumn[
+\icmltitle{Multi-Armed Bandits for Optimizing New Peers in Peer-to-Peer Networks}
+
+% It is OKAY to include author information, even for blind
+% submissions: the style file will automatically remove it for you
+% unless you've provided the [accepted] option to the icml2020
+% package.
+
+% List of affiliations: The first argument should be a (short)
+% identifier you will use later to specify author affiliations
+% Academic affiliations should list Department, University, City, Region, Country
+% Industry affiliations should list Company, City, Region, Country
+
+% You can specify symbols, otherwise they are numbered in order.
+% Ideally, you should not use this facility. Affiliations will be numbered
+% in order of appearance and this is the preferred way.
+% \icmlsetsymbol{equal}{*}
+
+\begin{icmlauthorlist}
+\icmlauthor{Oscar Sandford}{to}
+\end{icmlauthorlist}
+
+\icmlaffiliation{to}{Department of Computer Science, University of Victoria, Victoria, Canada}
+
+\icmlcorrespondingauthor{Oscar Sandford}{oscarsandford@uvic.ca}
+
+% You may provide any keywords that you
+% find helpful for describing your paper; these are used to populate
+% the "keywords" metadata in the PDF but will not be shown in the document
+\icmlkeywords{Machine Learning, ICML}
+
+\vskip 0.3in
+]
+
+% this must go after the closing bracket ] following \twocolumn[ ...
+
+% This command actually creates the footnote in the first column
+% listing the affiliations and the copyright notice.
+% The command takes one argument, which is text to display at the start of the footnote.
+% The \icmlEqualContribution command is standard text for equal contribution.
+% Remove it (just {}) if you do not need this facility.
+
+\printAffiliationsAndNotice{}  % leave blank if no need to mention equal contribution
+%\printAffiliationsAndNotice{\icmlEqualContribution} % otherwise use the standard text.
+
+\begin{abstract}
+Write this last.
+\end{abstract}
+
+\section{Introduction}
+Introduction here. Problem, how we got here, what the general idea is.
+
+%-------------------------------------------------------------------------
+
+\section{Related Work}
+
+Example of related work section.
+
+\cite{kool2018attention} and \cite{vaswani2017attention} push forward the idea of~\cite{bello2016neural} and 
+employ graph attention network that incorporates both the graph topology and input features as opposed to the previous architecture 
+that employed a graph-agnostic sequence to sequence mapping. ... Experimental results also 
+show that this model brings benefits over the pointer network in~\cite{bello2016neural}. 
+
+
+%-------------------------------------------------------------------------
+\section{Framework}
+
+Explain the technical bits.
+
+\begin{algorithm}[tb]
+   \caption{k-step Q-learning}
+   \label{alg:alg1}
+\begin{algorithmic}
+   \STATE {\bfseries Input:} number of episodes $Z$, and replay batch $B$
+   \STATE {\bfseries Output:} $\Theta$
+   \STATE Initialize experience replay memory $M$ to capacity $N$
+   \STATE Initialize agent network parameters $\Theta$
+   \FOR{episode = 1 {\bfseries to} Z}
+   \STATE $g \sim$ SampleGraph($G$)
+   \STATE $s \sim$ SampleSolution($S$)
+   \FOR{i = 1 {\bfseries to} m}
+   \STATE Compute the context vector $c_i$
+   \STATE $a_i=\left\{\begin{array}{ll} 
+                \text{random host} & w.p. \hspace{5pt} \epsilon \\
+                argmax \hspace{2pt} Q(c_i;\Theta) & \text{otherwise}\\
+                \end{array}
+                \right.$
+   \IF{$i \geq k$}
+   \STATE Add tuple $(c_{i-k}, a_{i-k}, r_{i-k:i}, c_i)$ to $M$
+   \ENDIF
+   \STATE Sample rand batch from replay memory $B \overset{i.i.d}{\sim} M$
+   \STATE Update $\Theta$ by Adam given the average loss over $B$
+   \ENDFOR
+   \ENDFOR
+\end{algorithmic}
+\end{algorithm}
+%----------------------------------------------------------------------------------
+
+
+\section{Experiments}
+
+What was done.
+
+%-------------------------------------------------------------------------------
+\section{Discussion}
+
+Discussion on results.
+
+\section{Conclusion and Future Research}
+
+Future work, takeaways.
+
+
+\bibliography{icml}
+\bibliographystyle{icml2021}
+
+\end{document}

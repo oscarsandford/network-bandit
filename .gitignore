@@ -1,0 +1,7 @@
+report/report.*
+!report/report.tex
+!report/report.pdf
+
+**/env*
+**/__pycache__
+**/.ipynb_checkpoints
