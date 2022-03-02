@@ -56,11 +56,13 @@
 
 \begin{icmlauthorlist}
 \icmlauthor{Oscar Sandford}{to}
+\icmlauthor{Shawn Nettleton}{to}
 \end{icmlauthorlist}
 
 \icmlaffiliation{to}{Department of Computer Science, University of Victoria, Victoria, Canada}
 
 \icmlcorrespondingauthor{Oscar Sandford}{oscarsandford@uvic.ca}
+\icmlcorrespondingauthor{Shawn Nettleton}{shawnnettleton@uvic.ca}
 
 % You may provide any keywords that you
 % find helpful for describing your paper; these are used to populate
@@ -82,17 +84,17 @@
 %\printAffiliationsAndNotice{\icmlEqualContribution} % otherwise use the standard text.
 
 \begin{abstract}
-Write this last.
+Write this last (fewer than 300 words). The completed document should be 5-9 pages.
 \end{abstract}
 
 \section{Introduction}
-Introduction here. Problem, how we got here, what the general idea is.
+Introduction here. Problem, why it is important/interesting, and the plan for the approach.
 
 %-------------------------------------------------------------------------
 
 \section{Related Work}
 
-Example of related work section.
+Example of related work section. Discuss relevant literature.
 
 \cite{kool2018attention} and \cite{vaswani2017attention} push forward the idea of~\cite{bello2016neural} and 
 employ graph attention network that incorporates both the graph topology and input features as opposed to the previous architecture 
@@ -101,55 +103,33 @@ show that this model brings benefits over the pointer network in~\cite{bello2016
 
 
 %-------------------------------------------------------------------------
-\section{Framework}
+\section{Problem Formulation}
 
 Explain the technical bits.
 
-\begin{algorithm}[tb]
-   \caption{k-step Q-learning}
-   \label{alg:alg1}
-\begin{algorithmic}
-   \STATE {\bfseries Input:} number of episodes $Z$, and replay batch $B$
-   \STATE {\bfseries Output:} $\Theta$
-   \STATE Initialize experience replay memory $M$ to capacity $N$
-   \STATE Initialize agent network parameters $\Theta$
-   \FOR{episode = 1 {\bfseries to} Z}
-   \STATE $g \sim$ SampleGraph($G$)
-   \STATE $s \sim$ SampleSolution($S$)
-   \FOR{i = 1 {\bfseries to} m}
-   \STATE Compute the context vector $c_i$
-   \STATE $a_i=\left\{\begin{array}{ll} 
-                \text{random host} & w.p. \hspace{5pt} \epsilon \\
-                argmax \hspace{2pt} Q(c_i;\Theta) & \text{otherwise}\\
-                \end{array}
-                \right.$
-   \IF{$i \geq k$}
-   \STATE Add tuple $(c_{i-k}, a_{i-k}, r_{i-k:i}, c_i)$ to $M$
-   \ENDIF
-   \STATE Sample rand batch from replay memory $B \overset{i.i.d}{\sim} M$
-   \STATE Update $\Theta$ by Adam given the average loss over $B$
-   \ENDFOR
-   \ENDFOR
-\end{algorithmic}
-\end{algorithm}
+
+%-------------------------------------------------------------------------
+\section{Approach}
+
+Algorithms we will use and develop (e.g. eps-greedy, UCB, and more). Implementation details, pseudocode here.
+
 %----------------------------------------------------------------------------------
 
+\section{Results}
 
-\section{Experiments}
-
-What was done.
+Use of implementation to produce results. Graphs here.
 
 %-------------------------------------------------------------------------------
 \section{Discussion}
 
-Discussion on results.
+Discussion on results. Pros and cons of suggested solution compared with existing solutions. 
 
 \section{Conclusion and Future Research}
 
-Future work, takeaways.
+What we learned. Future work, takeaways.
 
 
-\bibliography{icml}
+\bibliography{refs}
 \bibliographystyle{icml2021}
 
 \end{document}
