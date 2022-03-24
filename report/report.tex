@@ -101,19 +101,33 @@ It is essential that this new peer is fed the relevant data as fast as possible 
 well as any necessary quality of service targets. With the added volatility of a dynamic network setting, the rate at which a new peer can be brought "up to speed" 
 becomes far more crucial.
 
-In this study, we abstract the new peer scenario described above as a reinforcement learning problem with multi-armed bandits. Various algorithms to solve 
-the multi-armed bandit problem are considered, and a select few are implemented in order to evaluate their efficacy against this problem. Related literature 
-is surveyed in order to compare our work with solutions to similar problems and verify the validity of our results.
+In this study, we abstract the new peer scenario described above as a reinforcement learning problem with multi-armed bandits. The multi-armed bandit problem involves 
+$k$ slot machines (slot machines are sometimes called one-armed bandits) which pay out reward values according to an internal distribution, of which the agent cannot 
+know. The goal is to pick a strategy to learn which arms pay out the most in order to to maximize total reward over a set number of rounds \cite{mab_algos}. 
+
+Various algorithms to solve the multi-armed bandit problem are considered, and a select few are implemented in order to evaluate their efficacy against this problem. 
+Related literature is surveyed in order to compare our work with solutions to similar problems and verify the validity of our results. Formal problem formulation precedes 
+an explanation of the approach and a discussion of the results.
 
 %-------------------------------------------------------------------------
 % Example of related work section. Discuss relevant literature.
 \section{Related Work}
 
-\subsection{Algorithms Used}
+\subsection{Bandit Algorithms}
+% Maybe we talk more about specific algorithms in the approach section?
 
-\subsection{Domain \& Network Specific}
 
-Text here.
+\subsection{Computer Networks}
+Multi-armed bandits serve as a useful abstraction for optimization problems that require decision making with reward outcomes that are initially unknown. In a study 
+concerning cognitive radio networks \cite{qos_selection_mab}, secondary user (SU) nodes select a single channel for information exchange at one time, with no knowledge 
+about channel quality or availability. The authors use a variation on the upper confidence bound (UBC) algorithm, namely QoS-UCB. Their scenario is called "restless", meaning 
+that the states of the arms can fluctuate over time, affecting their internal distrubtions and the resulting payouts.
+
+The task of wireless network selection, with the goal of maximizing perceived quality for the end user, is handled by extending the bandit model to be more flexible 
+\cite{muMAB_wireless}. In this formulation, the agent can take one of two actions (which can span multiple time steps): measure or use. The difference is that 
+measurement allows only evaluation, whereas using adds exploitation. Measuring takes less time than using, which can span a set number of time steps. Results showed 
+that the choice of algorithm depended on the payout distributions. Conservative UCB1 is useful when arm rewards are similar, MLI when one arm is clearly better. 
+More aggressive algorithms like POKER can lead to low regret but high variability, and are therefore less reliable \cite{muMAB_wireless}.
 
 
 %-------------------------------------------------------------------------
@@ -123,15 +137,18 @@ Consider the setting of a peer-to-peer network wherein a new peer joins with the
 possible (i.e. download all the data in the network from other peers). However, the new peer does not know the network speeds of its seeds, just how much data 
 it receives over time when it chooses a peer and receives data from them for one time step. The reward is how many bytes received in that time slot.
 
+
+
 We want to be careful about defining the reward, because we want the agent to choose the peer that is transmitting the fastest. However, consider that network 
-speeds may change, and the optimal seed to leech from will not always be the best.
+speeds may change, and the optimal seed to leech from will not always be the best. We call this a "restless" scenario.
 
 
 %-------------------------------------------------------------------------
 % Algorithms we will use and develop (e.g. eps-greedy, UCB, and more). Implementation details, pseudocode here.
 \section{Approach}
+% Various algorithms will be considered, starting with epsilon-greedy and UCB (upper confidence bound). More complex bandit algorithms are considered as well.
 
-Various algorithms will be considered, starting with epsilon-greedy and UCB (upper confidence bound). More complex bandit algorithms are considered as well.
+
 
 %----------------------------------------------------------------------------------
 % Use of implementation to produce results. Graphs here.
