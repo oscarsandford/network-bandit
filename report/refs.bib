@@ -1,5 +1,16 @@
 %% References here. No fewer than 10 references.
 
+@inproceedings{p2p_def,
+  author    = {Schollmeier, R.},
+  booktitle = {Proceedings First International Conference on Peer-to-Peer Computing},
+  title     = {A definition of peer-to-peer networking for the classification of peer-to-peer architectures and applications},
+  year      = {2001},
+  volume    = {},
+  number    = {},
+  pages     = {101-102},
+  doi       = {10.1109/P2P.2001.990434}
+}
+
 @inbook{mab_algos,
   author    = {Vermorel,Joannès and Mohri,Mehryar},
   year      = {2005},
@@ -59,4 +70,91 @@
   number  = {1},
   pages   = {24-30},
   doi     = {10.1109/MWC.001.1900280}
+}
+
+@inproceedings{mab_dist_exploration,
+  author    = {Hillel, Eshcar and Karnin, Zohar and Koren, Tomer and Lempel, Ronny and Somekh, Oren},
+  title     = {Distributed Exploration in Multi-Armed Bandits},
+  year      = {2013},
+  publisher = {Curran Associates Inc.},
+  address   = {Red Hook, NY, USA},
+  booktitle = {Proceedings of the 26th International Conference on Neural Information Processing Systems - Volume 1},
+  pages     = {854-862},
+  numpages  = {9},
+  location  = {Lake Tahoe, Nevada},
+  series    = {NIPS'13}
+}
+
+@inproceedings{link_adaptation_in_cellular_networks,
+  author    = {Saxena, Vidit and Jald\'{e}n, Joakim and Gonzalez, Joseph E. and Bengtsson, Mats and Tullberg, Hugo and Stoica, Ion},
+  title     = {Contextual Multi-Armed Bandits for Link Adaptation in Cellular Networks},
+  year      = {2019},
+  isbn      = {9781450368728},
+  publisher = {Association for Computing Machinery},
+  address   = {New York, NY, USA},
+  url       = {https://doi.org/10.1145/3341216.3342212},
+  doi       = {10.1145/3341216.3342212},
+  abstract  = {Cellular networks dynamically adjust the transmission parameters for a wireless link in response to its time-varying channel state. This is known as link adaptation, where the typical goal is to maximize the link throughput. State-of-the-art outer loop link adaptation (OLLA) selects the optimal transmission parameters based on an approximate, offline, model of the wireless link. Further, OLLA refines the offline model by dynamically compensating any deviations from the observed link performance. However, in practice, OLLA suffers from slow convergence and a sub-optimal link throughput. In this paper, we propose a link adaptation approach that overcomes the shortcomings of OLLA through a novel learning scheme. Our approach relies on contextual multi-armed bandits (MAB), where the context vector is composed of the instantaneous wireless channel state along with side information about the link. For a given context, our approach learns the success probability for each of the available transmission parameters, which is then exploited to select the throughput-maximizing parameters. Through numerical experiments, we show that our approach converges faster than OLLA and achieves a higher steady-state link throughput. For frequent and infrequent channel reports respectively, our scheme outperforms OLLA by 15% and 25% in terms of the steady-state link throughput.},
+  booktitle = {Proceedings of the 2019 Workshop on Network Meets AI &amp; ML},
+  pages     = {44-49},
+  numpages  = {6},
+  keywords  = {cellular networks, artificial neural networks, outer loop link adaptation, contextual multi-armed bandits},
+  location  = {Beijing, China},
+  series    = {NetAI'19}
+}
+
+@inproceedings{homogeneous_rewards_over_directed_graphs,
+  author    = {Zhu, Jingxuan and Liu, Ji},
+  booktitle = {2021 American Control Conference (ACC)},
+  title     = {A Distributed Algorithm for Multi-Armed Bandit with Homogeneous Rewards over Directed Graphs},
+  year      = {2021},
+  volume    = {},
+  number    = {},
+  pages     = {3038-3043},
+  doi       = {10.23919/ACC50511.2021.9483267}
+}
+
+@misc{mab_algos_1,
+  doi       = {10.48550/ARXIV.1402.6028},
+  url       = {https://arxiv.org/abs/1402.6028},
+  author    = {Kuleshov, Volodymyr and Precup, Doina},
+  keywords  = {Artificial Intelligence (cs.AI), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},
+  title     = {Algorithms for multi-armed bandit problems},
+  publisher = {arXiv},
+  year      = {2014},
+  copyright = {arXiv.org perpetual, non-exclusive license}
+}
+
+@inproceedings{gossip_based_distrivuted_stochastic,
+  author    = {Sz\"{o}r\'{e}nyi, Bal\'{a}zs and Busa-Fekete, R\'{o}bert and Heged\"{u}s, Istv\'{a}n and Orm\'{a}ndi, R\'{o}bert and Jelasity, M\'{a}rk and K\'{e}gl, Bal\'{a}zs},
+  title     = {Gossip-Based Distributed Stochastic Bandit Algorithms},
+  year      = {2013},
+  publisher = {JMLR.org},
+  abstract  = {The multi-armed bandit problem has attracted remarkable attention in the machine learning community and many efficient algorithms have been proposed to handle the so-called exploitation-exploration dilemma in various bandit setups. At the same time, significantly less effort has been devoted to adapting bandit algorithms to particular architectures, such as sensor networks, multicore machines, or peer-to-peer (P2P) environments, which could potentially speed up their convergence. Our goal is to adapt stochastic bandit algorithms to P2P networks. In our setup, the same set of arms is available in each peer. In every iteration each peer can pull one arm independently of the other peers, and then some limited communication is possible with a few random other peers. As our main result, we show that our adaptation achieves a linear speedup in terms of the number of peers participating in the network. More precisely, we show that the probability of playing a suboptimal arm at a peer in iteration t = Ω(log N) is proportional to 1/(Nt) where N denotes the number of peers. The theoretical results are supported by simulation experiments showing that our algorithm scales gracefully with the size of network.},
+  booktitle = {Proceedings of the 30th International Conference on International Conference on Machine Learning - Volume 28},
+  pages     = {III-19-III-27},
+  location  = {Atlanta, GA, USA},
+  series    = {ICML'13}
+}
+
+@inproceedings{p2p_offloading_with_delayed_feedback,
+  author    = {Yang, Miao and Zhu, Hongbin and Wang, Haifeng and Koucheryavy, Yevgeni and Samouylov, Konstantin and Qian, Hua},
+  booktitle = {ICASSP 2020 - 2020 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP)},
+  title     = {Peer To Peer Offloading With Delayed Feedback: An Adversary Bandit Approach},
+  year      = {2020},
+  volume    = {},
+  number    = {},
+  pages     = {5035-5039},
+  doi       = {10.1109/ICASSP40776.2020.9053680}
+}
+
+@inproceedings{p2p_net_sender_scheduling,
+  author    = {Si, Pengbo and Yu, F. Richard and Ji, Hong and Leung, Victor C. M.},
+  booktitle = {IEEE GLOBECOM 2008 - 2008 IEEE Global Telecommunications Conference},
+  title     = {Distributed Sender Scheduling for Multimedia Transmission in Wireless Peer-to-Peer Networks},
+  year      = {2008},
+  volume    = {},
+  number    = {},
+  pages     = {1-5},
+  doi       = {10.1109/GLOCOM.2008.ECP.992}
 }

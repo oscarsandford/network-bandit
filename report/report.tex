@@ -87,14 +87,33 @@
 Write this last (fewer than 300 words). The completed document should be 5-9 pages.
 \end{abstract}
 
+%-------------------------------------------------------------------------------
+% Problem, why it is important/interesting, and the plan for the approach.
 \section{Introduction}
-Introduction here. Problem, why it is important/interesting, and the plan for the approach.
+Peer-to-peer computer networks create a unique environment for content distribution wherein the integrity of the system is not compromised by the failure of 
+a single, centralized node in the network. According to \cite{p2p_def}, true peer-to-peer systems require peers to be mutually directly accessible (without 
+intermediate entities), as well as the network state or quality of service being preserved in the advent of a peer being removed from the network, for any 
+reason.
+
+The requirements for peer-to-peer networks in different application domains vary. However, new peers that are directly accessing the server for the first time 
+have no information on the network state. New peers therefore cannot be held accountable to preserve the network state and its content if other nodes disconnect. 
+It is essential that this new peer is fed the relevant data as fast as possible in order to fulfill both the requirements of a true peer-to-peer environment, as 
+well as any necessary quality of service targets. With the added volatility of a dynamic network setting, the rate at which a new peer can be brought "up to speed" 
+becomes far more crucial.
+
+In this study, we abstract the new peer scenario described above as a reinforcement learning problem with multi-armed bandits. Various algorithms to solve 
+the multi-armed bandit problem are considered, and a select few are implemented in order to evaluate their efficacy against this problem. Related literature 
+is surveyed in order to compare our work with solutions to similar problems and verify the validity of our results.
 
 %-------------------------------------------------------------------------
-
+% Example of related work section. Discuss relevant literature.
 \section{Related Work}
 
-Example of related work section. Discuss relevant literature. \cite{mab_algos}
+\subsection{Algorithms Used}
+
+\subsection{Domain \& Network Specific}
+
+Text here.
 
 
 %-------------------------------------------------------------------------
@@ -109,26 +128,36 @@ speeds may change, and the optimal seed to leech from will not always be the bes
 
 
 %-------------------------------------------------------------------------
+% Algorithms we will use and develop (e.g. eps-greedy, UCB, and more). Implementation details, pseudocode here.
 \section{Approach}
-
-Algorithms we will use and develop (e.g. eps-greedy, UCB, and more). Implementation details, pseudocode here.
 
 Various algorithms will be considered, starting with epsilon-greedy and UCB (upper confidence bound). More complex bandit algorithms are considered as well.
 
 %----------------------------------------------------------------------------------
-
+% Use of implementation to produce results. Graphs here.
 \section{Results}
+Text here.
 
-Use of implementation to produce results. Graphs here.
+% What results we expect? Include assumptions and proof sketches.
+\subsection{Theoretical Results} 
+Text here.
+
+% Details on experiments and test results.
+\subsection{Experiment Results} 
+Text here.
+
 
 %-------------------------------------------------------------------------------
+% Discussion on results. Pros and cons of suggested solution compared with existing solutions. 
 \section{Discussion}
 
-Discussion on results. Pros and cons of suggested solution compared with existing solutions. 
+Text here.
 
+%-------------------------------------------------------------------------------
+% What we learned. Future work, takeaways.
 \section{Conclusion and Future Research}
 
-What we learned. Future work, takeaways.
+Text here.
 
 
 \bibliography{refs}
