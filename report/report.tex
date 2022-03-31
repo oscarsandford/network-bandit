@@ -106,22 +106,23 @@ $k$ slot machines (slot machines are sometimes called one-armed bandits) which p
 know. The goal is to pick a strategy to learn which arms pay out the most in order to to maximize total reward over a set number of rounds \cite{mab_algos}. 
 
 Various algorithms to solve the multi-armed bandit problem are considered, and a select few are implemented in order to evaluate their efficacy against this problem. 
-Related literature is surveyed in order to compare our work with solutions to similar problems and verify the validity of our results. Formal problem formulation precedes 
-an explanation of the approach and a discussion of the results.
+Related literature is surveyed in order to compare our work with solutions to similar problems and verify the validity of our results. Formulation of this challenge 
+as a reinforcement learning problem precedes an explanation of the approach and a discussion of the results. First, a survey of related work concerning the application 
+of multi-armed bandits to computer networking problems.
 
 %-------------------------------------------------------------------------
 % Example of related work section. Discuss relevant literature.
 \section{Related Work}
 
-\subsection{Bandit Algorithms}
+% \subsection{Bandit Algorithms}
 % Maybe we talk more about specific algorithms in the approach section?
 
 
-\subsection{Computer Networks}
+% \subsection{Computer Networks}
 Multi-armed bandits serve as a useful abstraction for optimization problems that require decision making with reward outcomes that are initially unknown. In a study 
 concerning cognitive radio networks \cite{qos_selection_mab}, secondary user (SU) nodes select a single channel for information exchange at one time, with no knowledge 
-about channel quality or availability. The authors use a variation on the upper confidence bound (UBC) algorithm, namely QoS-UCB. Their scenario is called "restless", meaning 
-that the states of the arms can fluctuate over time, affecting their internal distrubtions and the resulting payouts.
+about channel quality or availability. The authors use a variation on the upper confidence bound (UCB) algorithm, namely QoS-UCB. Their scenario is called "restless", 
+meaning that the states of the arms can fluctuate over time, affecting their internal distrubtions and the resulting payouts.
 
 The task of wireless network selection, with the goal of maximizing perceived quality for the end user, is handled by extending the bandit model to be more flexible 
 \cite{muMAB_wireless}. In this formulation, the agent can take one of two actions (which can span multiple time steps): measure or use. The difference is that 
@@ -129,15 +130,27 @@ measurement allows only evaluation, whereas using adds exploitation. Measuring t
 that the choice of algorithm depended on the payout distributions. Conservative UCB1 is useful when arm rewards are similar, MLI when one arm is clearly better. 
 More aggressive algorithms like POKER can lead to low regret but high variability, and are therefore less reliable \cite{muMAB_wireless}.
 
+Anver and Mannor share methods for multiple multi-armed bandit agents, coordinating with each other and learning stochastic network conditions, which may vary between 
+users \cite{multiuser_mab}. Their problem formulation is similar to our intentions, but with the agent transmitting instead of receiving. Further, they bound their rewards 
+on the interval $[0,1]$. The problem with this reward formulation when it comes to receiving is that, while outward transmission speed or success may be measureably bounded, 
+reception rate is not necessarily bounded. In fact, there may be conditions when the end receiver does not have the resources to unpack the transmission packages in time, 
+and will become congested. This paper uses techniques to deal with collisions when two or more users transmit in a single channel \cite{multiuser_mab}. In our problem, we 
+are only operating with unicast in a channel selected by the requesting peer. A last thing of note is Anver and Mannor's use of UCB in the channel ranking part of their 
+algorithm selection.
+
+Another paper surveys resource scheduling with multi-armed bandits in wireless networks \cite{mab_wireless_scheduling_survey}. They mention that $\varepsilon$-greedy, an 
+algorithm that balancing exploration and exploitation, has shortcomings in its "pure" randomness, and does not take into account confidence intervals on the reward estimates 
+of each arm. UCB exploits this, and also tapers off exploration over time. The authors make the distinction between single- and multi-player multi-armed bandits (SMAB and 
+MMAB), where the former involves a single agent operating the bandit selection mechanism. SMAB have applications in our single peer leeching scenario, as well as centralized 
+network algorithms. MMAB often involve distributed selection that sacrifices independence for synchronization overhead \cite{mab_wireless_scheduling_survey}.
 
 %-------------------------------------------------------------------------
 \section{Problem Formulation}
 
 Consider the setting of a peer-to-peer network wherein a new peer joins with the intent to be brought "up to speed" with the rest of the network as soon as 
 possible (i.e. download all the data in the network from other peers). However, the new peer does not know the network speeds of its seeds, just how much data 
-it receives over time when it chooses a peer and receives data from them for one time step. The reward is how many bytes received in that time slot.
-
-
+it receives over time when it chooses a peer and receives data from them for one time step. The reward is how many bytes received in that time slot. We will 
+assume that data packets are UDP datagrams.
 
 We want to be careful about defining the reward, because we want the agent to choose the peer that is transmitting the fastest. However, consider that network 
 speeds may change, and the optimal seed to leech from will not always be the best. We call this a "restless" scenario.
