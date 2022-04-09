@@ -144,26 +144,27 @@ of each arm. UCB exploits this, and also tapers off exploration over time. The a
 MMAB), where the former involves a single agent operating the bandit selection mechanism. SMAB have applications in our single peer leeching scenario, as well as centralized 
 network algorithms. MMAB often involve distributed selection that sacrifices independence for synchronization overhead \cite{mab_wireless_scheduling_survey}.
 
-Similarly Eshcar Hillel et al, explore how k players collaborate to identify an $\varepsilon$-optimal arm in a MAB setting, and determine communicating only
-once players are able to learn at a rate of sqrt{k} times faster than a single player \cite{mab_dist_exploration}. This methodology may prove useful as the number of peers within 
-the network fluctuates or quality of service changes. 
+Similarly Eshcar Hillel \textit{et al}, explore how $k$ players collaborate to identify an $\varepsilon$-optimal arm in a MAB setting, and determine communicating only
+once players are able to learn at a rate of $\sqrt{k}$ times faster than a single player \cite{mab_dist_exploration}. This methodology may prove useful as the number of 
+peers within the network fluctuates or quality of service changes. 
 
-Multi-armed bandit problems have been gaining significant attraction, however less effort has been devoting to adapting existing bandit algorithms to specific architectures such as peer-to-peer 
-network environments \cite{gossip_based_distrivuted_stochastic}. This paper successfully implements the $\varepsilon$-greedy stochastic algorithm to a peer-to-peer network environment, scaling with the 
-size of network, achieving a linear speedup in terms of the number of peers and preserving the asymptotic behaviour of the standalone version. 
-They also present a heuristic which has a lower network communication cost which may prove helpful with adapting other related works. Scenarios of distributed clustering have shown to be promising
-at solving MAB problems within peer-to-peer networks \cite{dist_clustering_p2p}. There are two setups in particular, the first where all peers are solving the same problem and second where a cluster of peers 
-solve the same problem within each cluster. This has shown to achieve an optimal regret rate, defined as the expected difference between the reward sum associated with an optimal strategy and the sum of 
-the collected rewards. We hope to adapt these works within our approach.
+Multi-armed bandit problems have been gaining significant attraction, however less effort has been devoting to adapting existing bandit algorithms to specific architectures 
+such as peer-to-peer network environments \cite{gossip_based_distrivuted_stochastic}. This paper successfully implements the $\varepsilon$-greedy stochastic algorithm to a 
+peer-to-peer network environment, scaling with the size of network, achieving a linear speedup in terms of the number of peers and preserving the asymptotic behaviour of the 
+standalone version. They also present a heuristic which has a lower network communication cost which may prove helpful with adapting other related works. Scenarios of 
+distributed clustering have shown to be promising at solving MAB problems within peer-to-peer networks \cite{dist_clustering_p2p}. There are two setups in particular, the 
+first where all peers are solving the same problem and second where a cluster of peers solve the same problem within each cluster. This has shown to achieve an optimal regret 
+rate, defined as the expected difference between the reward sum associated with an optimal strategy and the sum of the collected rewards. We hope to adapt these works within 
+our approach.
 
-Within the peer-to-peer network environment competition amongst peers is inevitable, especially when peers are trying to stay up to date. Managing this competition can be difficult given 
-its somewhat unpredictable nature. Miao Yang et al, develop an online learning policy based on top of a MAB framework to deal with peer competition and delayed feedback \cite{p2p_offloading_with_delayed_feedback}. 
-Their work however is with relation to fog networks (FN), a decentralized computing infrastructure between the data source and the cloud. We aim to utilize some of their understandings while tackling the 
-peer-to-peer network scenario. 
+Competition amongst peers is inevitable within the peer-to-peer network environment, especially when peers are trying to stay up to date. Managing this competition can be 
+difficult given its somewhat unpredictable nature. Miao Yang \textit{et al}, develop an online learning policy based on top of a MAB framework to deal with peer competition 
+and delayed feedback \cite{p2p_offloading_with_delayed_feedback}. However, their work is with relation to fog networks (FN), a decentralized computing infrastructure between 
+the data source and the cloud. We aim to utilize some of their understandings while tackling the peer-to-peer network scenario. 
 
-The work done within \cite{p2p_net_sender_scheduling} showcases new considerations for not only optimizing data rate transmissions in wireless peer-to-peer networks but also minimizing power consumption. 
-Similar limitations are becoming popular when analyzing the use of graphical processing units (GPUs) such as the work within \cite{gpu_eng}. As more domain problems are aspiring for optimal performance 
-it is important to recognize new aspects such as power consumption. 
+The work done within \cite{p2p_net_sender_scheduling} showcases new considerations for not only optimizing data rate transmissions in wireless peer-to-peer networks but also 
+minimizing power consumption. Similar limitations are becoming popular when analyzing the use of graphical processing units (GPUs) such as the work within \cite{gpu_eng}. As 
+more domain problems are aspiring for optimal performance it is important to recognize new aspects such as power consumption. 
 
 
 
