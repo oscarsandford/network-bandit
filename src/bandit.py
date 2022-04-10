@@ -70,12 +70,25 @@ class PeerArm:
 			assert transmat.shape[0] == num_states, "PeerArm: transmat first dimension must equal number of peer states."
 			self.transmat = transmat
 
-		# A variable that can be changed based on an algorithm's measured reward of this arm.
-		self.measured_reward = 0.
+		# # A variable that can be changed based on an algorithm's measured reward of this arm.
+		# self.measured_reward:float = 0.
+		self.current_state:int = 0
 
-	def __repr__(self):
-		return f"State attrs: {self.states}\nTransmat:\n{self.transmat}"
+	def reset(self):
+		"""
+		Reset this arm's state to be the initial state it started with. 
+		Called by environment at end of episode.
+		"""
+		self.current_state = 0
 
+	# def __repr__(self):
+	# 	return f"State attrs: {self.states}\nTransmat:\n{self.transmat}"
+
+
+"""
+What kind of environment layouts do we want? (i.e. number of peers, how many are "fast", how many are "slow"?)
+
+"""
 
 class BanditEnv:
 	"""
@@ -84,16 +97,110 @@ class BanditEnv:
 	peer-arm info.
 	"""
 	def __init__(self, arms:list):
-		assert all([len(a) == 2 for a in attrs]), "BanditEnv: attr specifications must be 2-tuples."
 		self.k = len(arms)
 		self.arms = arms
 
 	def reset(self, seed:int):
 		np.random.seed(seed)
-		self.__init__()
+		# Reset current arm states to their initial state.
+		for arm in self.arms:
+			arm.reset()
 
-	def step(self, action:int, time:float):
-		pass
+	def step(self, action:int, timesteps:int=1) -> list:
+		"""
+		Pull from a peer for timestep time. The reward is the
+		total bytes the peer "receives" from this selection operation.
+		Generate reward and then flip arm states for `timestep` times.
+		"""
+		assert -1 < action < self.k, "BanditEnv: invalid action."
+		peer = self.arms[action] 
+		rewards = []
+		
+		# For each timestep, generate reward and transition all arms, because 
+		# we are still moving through time, so the environment must change.
+		for _ in range(timesteps):
+			
+			# Generating the rewards 
+			reward = np.random.normal(peer.states[peer.current_state].mean, peer.states[peer.current_state].sd)
+			rewards.append(reward)
+			
+			# Flipping the arm states for each time setp
+			for i, arm in enumerate(self.arms):
+				rand_state = np.random.choice(len(arm.states), 1, p=list(arm.transmat[arm.current_state]))[0]
+				self.arms[i].current_state = rand_state
 
-	def __repr__(self):
+		return rewards
+
+
+	def __repr__(self) -> str:
 		return "bandit"
+
+
+def epsilon(strategy:str, arms:list, eps:float, timesteps:int=1, T:int=1) -> list:
+	"""
+	strategy	: 
+	arms		:
+	eps			:
+	timesteps	:
+	T			:
+	
+	Return a list of statistical results for plotting.
+	We do 100 runs and 10000 rounds each run.
+	"""
+
+	env = BanditEnv(arms)
+	k = len(arms)
+	steptotals = np.zeros(10000)
+	
+	for i in range(100):
+		env.reset(i)
+
+		Q = np.zeros(k) 
+		N = np.zeros(k, dtype=int)
+
+		for t in range(10000):
+			if strategy == "eps-first":
+				# Epsilon-first: Always explore when below a certain threshold 
+				# of rounds specified by epsilon * T. T is given as a hyperparameter.
+				explore = t < (eps * T)
+			elif strategy == "eps-decreasing":
+				# Epsilon-decreasing: Given the initial eps, divide by the current t value.
+				explore = np.random.random() < (eps / t)
+			else: 
+				# Epsilon-greedy: Explore with probability eps, else greedy.
+				explore = np.random.random() < eps
+
+			if explore:
+				a = np.random.choice(env.k)
+			else:
+				a = np.argmax(Q)
+			
+			rewards:list = env.step(a, timesteps=timesteps)
+			
+			# Once timesteps > 1 we need to average the rewards within "rewards".
+			reward = np.mean(rewards)
+
+			N[a] = N[a] + 1
+			Q[a] = Q[a] + (1/N[a])*(reward-Q[a])
+			
+			steptotals[t] += reward
+		
+	return [el/100 for el in steptotals]
+
+
+def UCB(): 
+	"""
+	Upper Confidence Bound
+	"""
+
+
+	pass
+
+
+def POKER():
+	"""
+ 	Price of Knowledge and Estimated Reward (POKER)
+
+	"""
+
+	pass

@@ -187,6 +187,17 @@ speeds may change, and the optimal seed to leech from will not always be the bes
 
 \cite{mab_algos_1} - theoretical guarantees vs practical results of algorithms.
 
+The most common algorithm applied to multi-armed bandit problems is called $\varepsilon$-greedy. $\varepsilon$-greedy takes a single hyperparameter $\varepsilon$ that 
+dictates the probability of exploration (i.e. choosing a random arm from the possible selections), with $1-\varepsilon$ being the probability of choosing the optimal 
+arm based on the average rewards so far. We will employ $\varepsilon$-greedy, as well as some of its variants in this study. 
+
+$\varepsilon$-first is an $\varepsilon$-greedy strategy where only exploration is done for the first $T \cdot \varepsilon$ rounds, and pure exploitation is done during 
+the remaining rounds. $T$ is a hyperparameter specific to $\varepsilon$-first and decides when the cutoff better exploration and exploitation occurs \cite{mab_algos}.
+
+$\varepsilon$-decreasing is another $\varepsilon$-greedy variant wherein the initial $\varepsilon$ value $\varepsilon_0$ is decreased over the number of rounds completed. 
+More specifically, the probability of exploration at time $t$ is given by $\varepsilon_t = min\{ 1, \frac{\varepsilon_0}{t}\}$ where $\varepsilon > 0$ \cite{mab_algos}. 
+
+
 
 
 %----------------------------------------------------------------------------------
