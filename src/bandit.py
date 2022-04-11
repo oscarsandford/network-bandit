@@ -136,41 +136,45 @@ class BanditEnv:
 		return "bandit"
 
 
-def epsilon(strategy:str, arms:list, eps:float, timesteps:int=1, T:int=1) -> list:
+def epsilon(strategy:str, arms:list, eps:float, timesteps:int=1) -> list:
 	"""
-	strategy	: 
-	arms		:
-	eps			:
-	timesteps	:
-	T			:
+	strategy: str        _ Either "eps-first", "eps-decreasing", or "eps-greedy" - other values will default to the eps-greedy strategy.
+	arms: list<PeerArms> _ A list of PeerArm objects used in initializing the environment.
+	eps: float           _ The eponymous hyperparameter.
+	timesteps: int       _ The number of time steps to receive reward from a given arm. Can be made variable over time. Defaults to 1.
 	
 	Return a list of statistical results for plotting.
 	We do 100 runs and 10000 rounds each run.
 	"""
 
+	nruns = 100
+	nsteps = 10000
+
 	env = BanditEnv(arms)
 	k = len(arms)
-	steptotals = np.zeros(10000)
+	steptotals = np.zeros(nsteps)
 	
-	for i in range(100):
+	for i in range(nruns):
 		env.reset(i)
 
 		Q = np.zeros(k) 
 		N = np.zeros(k, dtype=int)
 
-		for t in range(10000):
+		for t in range(nsteps):
 			if strategy == "eps-first":
 				# Epsilon-first: Always explore when below a certain threshold 
-				# of rounds specified by epsilon * T. T is given as a hyperparameter.
-				explore = t < (eps * T)
+				# of rounds specified by epsilon * nsteps. In the paper, T is the 
+				# number of steps, so we just use nsteps here instead of T.
+				do_explore = t < (eps * nsteps)
 			elif strategy == "eps-decreasing":
-				# Epsilon-decreasing: Given the initial eps, divide by the current t value.
-				explore = np.random.random() < (eps / t)
+				# Epsilon-decreasing: Given the initial eps, divide by the 
+				# current t+1 value to avoid division by zero.
+				do_explore = np.random.random() < (eps / (t+1))
 			else: 
 				# Epsilon-greedy: Explore with probability eps, else greedy.
-				explore = np.random.random() < eps
+				do_explore = np.random.random() < eps
 
-			if explore:
+			if do_explore:
 				a = np.random.choice(env.k)
 			else:
 				a = np.argmax(Q)
@@ -185,7 +189,7 @@ def epsilon(strategy:str, arms:list, eps:float, timesteps:int=1, T:int=1) -> lis
 			
 			steptotals[t] += reward
 		
-	return [el/100 for el in steptotals]
+	return [el/nruns for el in steptotals]
 
 
 def UCB(): 
