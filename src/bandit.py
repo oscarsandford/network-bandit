@@ -1,3 +1,4 @@
+from typing import Callable
 import numpy as np
 import random
 from dataclasses import dataclass
@@ -70,8 +71,8 @@ class PeerArm:
 			assert transmat.shape[0] == num_states, "PeerArm: transmat first dimension must equal number of peer states."
 			self.transmat = transmat
 
-		# # A variable that can be changed based on an algorithm's measured reward of this arm.
-		# self.measured_reward:float = 0.
+		assert all([np.isclose(sum(self.transmat[i]), 1.0) for i in range(num_states)]), "PeerArm: a transmat row does not sum close to 1.0."
+
 		self.current_state:int = 0
 
 	def reset(self):
@@ -81,12 +82,58 @@ class PeerArm:
 		"""
 		self.current_state = 0
 
-	# def __repr__(self):
-	# 	return f"State attrs: {self.states}\nTransmat:\n{self.transmat}"
+	def __str__(self) -> str:
+		return f"State attrs: {self.states}\nTransmat:\n{self.transmat}"
 
 
 """
+
+PEER GENERATION
 What kind of environment layouts do we want? (i.e. number of peers, how many are "fast", how many are "slow"?)
+
+"""
+
+def create_peers(npeers:int, nstates_dist_fn, nstates_dist_params:dict, mean_dist_fn, mean_dist_params:dict, sd_dist_fn, sd_dist_params:dict) -> list:
+	"""
+	A function to automate creating a bunch of peers.
+
+	npeers: int                _ The number of PeerArms to create.
+	nstates_dist_fn: fn        _ The function used to sample the number of states for a given peer (e.g. numpy.random.normal, numpy.random.poisson, ...).
+	nstates_dist_params: dict  _ A dictionary with parameters for the nstates distribution.
+	mean_dist_fn: fn           _ The function used to sample means for a peer's state (e.g. numpy.random.normal, numpy.random.poisson, ...).
+	mean_dist_params: dict     _ A dictionary with parameters for the mean distribution.
+	sd_dist_fn: fn             _ The function used to sample standard deviations for a peer's state (e.g. numpy.random.normal, numpy.random.poisson, ...).
+	sd_dist_params: dict       _ A dictionary with parameters for the standard deviation distribution.
+	"""
+	peers = []
+
+	for _ in range(npeers):
+		nstates = int(nstates_dist_fn(**nstates_dist_params))
+		if nstates < 1:
+			nstates = 1
+		means = []
+		sds = []
+		for _ in range(nstates):
+			mean = mean_dist_fn(**mean_dist_params)
+			sd = sd_dist_fn(**sd_dist_params)
+			means.append(mean)
+			sds.append(abs(sd))
+		
+		# Create transmat with random transition probabilities. (Optional?)
+		transmat = np.zeros((nstates, nstates))
+		for i in range(nstates):
+			row = np.array([np.random.random() for _ in range(nstates)])
+			row = row/np.sum(row)
+			transmat[i] = row
+		
+		peer = PeerArm(means, sds, transmat)
+		peers.append(peer)
+
+	return peers
+
+"""
+
+ENVIRONMENT
 
 """
 
@@ -108,26 +155,26 @@ class BanditEnv:
 
 	def step(self, action:int, timesteps:int=1) -> list:
 		"""
-		Pull from a peer for timestep time. The reward is the
+		Pull from a peer (arm) for timestep time. The reward is the
 		total bytes the peer "receives" from this selection operation.
 		Generate reward and then flip arm states for `timestep` times.
 		"""
 		assert -1 < action < self.k, "BanditEnv: invalid action."
-		peer = self.arms[action] 
+		arm = self.arms[action] 
 		rewards = []
 		
 		# For each timestep, generate reward and transition all arms, because 
 		# we are still moving through time, so the environment must change.
 		for _ in range(timesteps):
 			
-			# Generating the rewards 
-			reward = np.random.normal(peer.states[peer.current_state].mean, peer.states[peer.current_state].sd)
+			# Generating the rewards.
+			reward = np.random.normal(arm.states[arm.current_state].mean, arm.states[arm.current_state].sd)
 			rewards.append(reward)
 			
-			# Flipping the arm states for each time setp
-			for i, arm in enumerate(self.arms):
-				rand_state = np.random.choice(len(arm.states), 1, p=list(arm.transmat[arm.current_state]))[0]
-				self.arms[i].current_state = rand_state
+			# Flipping the arm states for each time step.
+			for a in self.arms:
+				rand_state = np.random.choice(len(a.states), 1, p=list(a.transmat[a.current_state]))[0]
+				a.current_state = rand_state
 
 		return rewards
 
@@ -136,10 +183,17 @@ class BanditEnv:
 		return "bandit"
 
 
+
+"""
+
+ALGORITHMS
+
+"""
+
 def epsilon(strategy:str, arms:list, eps:float, timesteps:int=1) -> list:
 	"""
 	strategy: str        _ Either "eps-first", "eps-decreasing", or "eps-greedy" - other values will default to the eps-greedy strategy.
-	arms: list<PeerArms> _ A list of PeerArm objects used in initializing the environment.
+	arms: list<PeerArm>  _ A list of PeerArm objects used in initializing the environment.
 	eps: float           _ The eponymous hyperparameter.
 	timesteps: int       _ The number of time steps to receive reward from a given arm. Can be made variable over time. Defaults to 1.
 	
@@ -155,6 +209,7 @@ def epsilon(strategy:str, arms:list, eps:float, timesteps:int=1) -> list:
 	steptotals = np.zeros(nsteps)
 	
 	for i in range(nruns):
+		print(i, end=" ")
 		env.reset(i)
 
 		Q = np.zeros(k) 
