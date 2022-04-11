@@ -269,28 +269,3 @@ def UCB(arms:list) -> list:
 			# ...
 
 	return [total/nruns for total in steptotals]
-
-
-def POKER(arms:list) -> list:
-	"""
- 	Price of Knowledge and Estimated Reward (POKER)
-
-	"""
-	nruns = 100
-	nsteps = 10000
-
-	env = BanditEnv(arms)
-	steptotals = np.zeros(nsteps)
-
-	for i in range(nruns):
-		print(i, end=" ") # PROGRESS MODE
-		env.reset(i)
-
-		Q = np.zeros(env.k) 
-		N = np.zeros(env.k, dtype=int)
-
-		for t in range(nsteps):
-			pass
-			# ...
-
-	return [total/nruns for total in steptotals]

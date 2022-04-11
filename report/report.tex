@@ -212,9 +212,8 @@ $\varepsilon_0$ are typically not on the interval $[0,1]$, instead values like $
 
 % More on algos here..
 
-% UCB
+% UCB (and variants)
 
-% POKER
 
 \subsection{Implementation}
 In order to automate the creation of multiple peers, we devised Algorithm~\ref{alg:alg1} which takes as input a number of peers to generate, and three distributions (with 
@@ -258,7 +257,7 @@ mean and standard deviation because rewards are generated using a normal distrib
 \end{algorithmic}
 \end{algorithm}
 
-The algorithms discussed prior ($\varepsilon$-greedy, $\varepsilon$-first, $\varepsilon$-decreasing, UCB, and POKER) are implemented in Python. Each algorithm makes use 
+The algorithms discussed prior ($\varepsilon$-greedy, $\varepsilon$-first, $\varepsilon$-decreasing, and UCB) are implemented in Python. Each algorithm makes use 
 of a generic $BanditEnv$ environment in order to execute actions and reset the environment after each run. 
 
 By default the algorithms will take an action for 1 time step, but we have added functionality such that it is possible to take more than 1 action, and the end reward 
@@ -277,7 +276,7 @@ of each algorithm in our test environment.
 The preceding literature made $\varepsilon$-greedy out to be an attractive baseline that fares well for many use cases. We had little expectation for the $\varepsilon$-greedy 
 variants $\varepsilon$-first and $\varepsilon$-decreasing, and expected them to perform somewhat similarly. Algorithms based around UCB were commonly used in related works, 
 and we therefore expected UCB to be stronger than $\varepsilon$-greedy. POKER was shown by \cite{muMAB_wireless} to have low regret but be unreliable due to high variance, 
-so we expect it to have the greatest variance of the algorithms, especially given the dynamic transmission nature of the seed peers.
+due to these problems, time constraints, and the complexity of the pseudocode included in the paper, we deigned to not cover POKER in our evaluation.
 
 % Details on experiments and test results.
 \subsection{Experimental Results} 
