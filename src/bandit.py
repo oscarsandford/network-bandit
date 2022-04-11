@@ -1,4 +1,3 @@
-from typing import Callable
 import numpy as np
 import random
 from dataclasses import dataclass
@@ -192,6 +191,8 @@ ALGORITHMS
 
 def epsilon(strategy:str, arms:list, eps:float, timesteps:int=1) -> list:
 	"""
+	Epsilon-greedy and its variants: epsilon-first and epsilon-decreasing.
+
 	strategy: str        _ Either "eps-first", "eps-decreasing", or "eps-greedy" - other values will default to the eps-greedy strategy.
 	arms: list<PeerArm>  _ A list of PeerArm objects used in initializing the environment.
 	eps: float           _ The eponymous hyperparameter.
@@ -205,15 +206,14 @@ def epsilon(strategy:str, arms:list, eps:float, timesteps:int=1) -> list:
 	nsteps = 10000
 
 	env = BanditEnv(arms)
-	k = len(arms)
 	steptotals = np.zeros(nsteps)
 	
 	for i in range(nruns):
-		print(i, end=" ")
+		print(i, end=" ") # PROGRESS MODE
 		env.reset(i)
 
-		Q = np.zeros(k) 
-		N = np.zeros(k, dtype=int)
+		Q = np.zeros(env.k) 
+		N = np.zeros(env.k, dtype=int)
 
 		for t in range(nsteps):
 			if strategy == "eps-first":
@@ -244,22 +244,53 @@ def epsilon(strategy:str, arms:list, eps:float, timesteps:int=1) -> list:
 			
 			steptotals[t] += reward
 		
-	return [el/nruns for el in steptotals]
+	return [total/nruns for total in steptotals]
 
 
-def UCB(): 
+def UCB(arms:list) -> list: 
 	"""
 	Upper Confidence Bound
 	"""
+	nruns = 100
+	nsteps = 10000
+
+	env = BanditEnv(arms)
+	steptotals = np.zeros(nsteps)
+
+	for i in range(nruns):
+		print(i, end=" ") # PROGRESS MODE
+		env.reset(i)
+
+		Q = np.zeros(env.k) 
+		N = np.zeros(env.k, dtype=int)
+
+		for t in range(nsteps):
+			pass
+			# ...
+
+	return [total/nruns for total in steptotals]
 
 
-	pass
-
-
-def POKER():
+def POKER(arms:list) -> list:
 	"""
  	Price of Knowledge and Estimated Reward (POKER)
 
 	"""
+	nruns = 100
+	nsteps = 10000
 
-	pass
+	env = BanditEnv(arms)
+	steptotals = np.zeros(nsteps)
+
+	for i in range(nruns):
+		print(i, end=" ") # PROGRESS MODE
+		env.reset(i)
+
+		Q = np.zeros(env.k) 
+		N = np.zeros(env.k, dtype=int)
+
+		for t in range(nsteps):
+			pass
+			# ...
+
+	return [total/nruns for total in steptotals]
