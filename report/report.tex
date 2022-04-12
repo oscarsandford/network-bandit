@@ -212,9 +212,13 @@ SoftMax (also called Boltzmann Exploration) makes action decisions based on \emp
 probability $p_a = e^{Q_a/\tau}/\sum_{a'}e^{Q_{a'}/\tau}$ where $Q_a$ is the action value associated with action $a$. The hyperparameter of SoftMax is $\tau$, called the 
 \emph{temperature}. It can be varied similar to $\varepsilon$ in $\varepsilon$-greedy.
 
+Exp3 is a variant of SoftMax, using the idea of Boltzmann Exploration and probability matching \cite{mab_algos}. Each arm $a$ of $k$ arms has an associated probability of 
+being pulled at time $t$, $p_a(t) = (1-\gamma) \frac{w_a(t)}{\sum_{j=1}^k w_j(t)} + \frac{\gamma}{k}$. The single hyperparameter $\gamma$ indicates the learning 
+rate. The weights associated with each action $a$ at time $t$ are noted $w_a(t)$.
+
 % More on algos here..
 
-% UCB (and variants)
+% UCB (and UCB1)
 
 
 \subsection{Implementation}
@@ -222,7 +226,7 @@ In order to automate the creation of multiple peers, we devised Algorithm~\ref{a
 their associated hyperparameters) from which to sample the number of states a peer will have, and each state's mean and standard deviation reward. Each state requires a 
 mean and standard deviation because rewards are generated using a normal distribution. 
 
-Our baseline peer setup for this assessment does not use Algorithm~\ref{alg:alg1}, it is simply a set of 5 single-state peers: $PeerArm(2,1)$, $PeerArm(4,1)$, 
+Our baseline peer setup for this assessment does not use Algorithm~\ref{alg:alg1}, it is simply a set of 5 single-state peers we call $baseline$: $PeerArm(2,1)$, $PeerArm(4,1)$, 
 $PeerArm(6,1)$, $PeerArm(8,1)$, $PeerArm(10,1)$. This simple layout removes the simulated dynamism of multi-state peers, but provides a good baseline evaluation for 
 each algorithm. Later, we use Algorithm~\ref{alg:alg1} to create greater numbers of peers, each of which is more realistic in their transmission speed (reward) variance.
 
@@ -279,20 +283,35 @@ continue to be active for each time step. That is, the agent cannot "lock" the n
 %----------------------------------------------------------------------------------
 % Use of implementation to produce results. Graphs here.
 \section{Results}
-Each algorithm completes 100 runs, with 10000 steps each. The average reward for each step is averaged across 100 runs, and each of these averages is plotted for 10000 
-steps. In the following two subsections, we briefly discuss preliminary assumptions regarding the results, and then present plots containing visually definitive evaluations 
-of each algorithm in our test environment.
+Each algorithm completes 100 runs, with a fixed number of steps each. The number of steps relates to how long the peer will be receiving data from its peers. It will be worth 
+to consider how each algorithm fares in the short and long-term. To this end, we vary the number of steps in our experiments in order to better visualize this disparity.
+
+The average reward for each step is averaged across 100 runs, and each of these averages is plotted across the number of steps. In the following two subsections, we briefly 
+discuss preliminary assumptions regarding the results, and then present plots containing visually definitive evaluations of each algorithm in our test environment.
 
 % What results we expect? Include assumptions and proof sketches.
 \subsection{Theoretical Assumptions} 
 The preceding literature made $\varepsilon$-greedy out to be an attractive baseline that fares well for many use cases. We had little expectation for the $\varepsilon$-greedy 
 variants $\varepsilon$-first and $\varepsilon$-decreasing, and expected them to perform somewhat similarly. Algorithms based around UCB were commonly used in related works, 
-and we therefore expected UCB to be stronger than $\varepsilon$-greedy. SoftMax was expected to be eponymously "softer" than $\varepsilon$-greedy.
+and we therefore expected UCB to be stronger than $\varepsilon$-greedy. SoftMax was expected to be eponymously "softer" than $\varepsilon$-greedy. Exp3 was expected to be 
+similar to SoftMax due to it being derivative of the SoftMax probability drawing method.
 
 % Details on experiments and test results.
 \subsection{Experimental Results} 
 Text here.
+% Start with baseline 5 peers.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\linewidth]{Figures/base5peers_1000step_5algos.png}
+    \caption{Average reward over time for each algorithm over 1000 steps using $baseline$ peers.}
+    \label{fig:base5peers_1000step_5algos}
+\end{figure}
 
+% Then n=10 gen peers.
+
+% Then n=25 gen peers.
+
+% Does softmax eventually overtake eps-greedy? Baseline 5 peers case vs. n=10 gen peers case.
 
 %-------------------------------------------------------------------------------
 % Discussion on results. Pros and cons of suggested solution compared with existing solutions. 

@@ -1,6 +1,7 @@
 import numpy as np
 from dataclasses import dataclass
 
+nruns = 100
 
 @dataclass
 class State:
@@ -196,7 +197,7 @@ ALGORITHMS
 """
 
 
-def epsilon(strategy: str, arms: list, eps: float, timesteps: int = 1) -> list:
+def epsilon(strategy: str, arms: list, eps: float, nsteps: int = 10000, timesteps: int = 1) -> list:
 	"""
 	Epsilon-greedy and its variants: epsilon-first and epsilon-decreasing.
 
@@ -208,9 +209,7 @@ def epsilon(strategy: str, arms: list, eps: float, timesteps: int = 1) -> list:
 	Return a list of statistical results for plotting.
 	We do 100 runs and 10000 rounds each run.
 	"""
-
-	nruns = 100
-	nsteps = 10000
+	global nruns
 
 	env = BanditEnv(arms)
 	steptotals = np.zeros(nsteps)
@@ -254,7 +253,7 @@ def epsilon(strategy: str, arms: list, eps: float, timesteps: int = 1) -> list:
 	return [total / nruns for total in steptotals]
 
 
-def UCB(strategy: str, arms: list, C: float = 1, timesteps: int = 1) -> list:
+def UCB(strategy: str, arms: list, C: float = 1, nsteps: int = 10000, timesteps: int = 1) -> list:
 	"""
 	arms: list<PeerArm>  _ A list of PeerArm objects used in initializing the environment.
 	C: float             _ Controls the degree of exploration. C > 0. Defaults to 1.
@@ -263,8 +262,7 @@ def UCB(strategy: str, arms: list, C: float = 1, timesteps: int = 1) -> list:
 	
 	Upper Confidence Bound
 	"""
-	nruns = 100
-	nsteps = 10000
+	global nruns
 
 	env = BanditEnv(arms)
 	steptotals = np.zeros(nsteps)
@@ -306,7 +304,7 @@ def UCB(strategy: str, arms: list, C: float = 1, timesteps: int = 1) -> list:
 	return [total / nruns for total in steptotals]
 
 
-def softmax(arms: list, tau: float, timesteps: int = 1) -> list:
+def softmax(arms: list, tau: float, nsteps: int = 10000, timesteps: int = 1) -> list:
 	"""
 	SoftMax (Boltzmann Exploration)
 
@@ -317,8 +315,7 @@ def softmax(arms: list, tau: float, timesteps: int = 1) -> list:
 
 	p_a = \exp{Q[a] / tau} / \sum_{i=1}^k \exp{Q[i] / tau}
  	"""
-	nruns = 100
-	nsteps = 10000
+	global nruns
 
 	# For some reason, it seems that my input value for tau is "inverted" in its performance. Typically we 
 	# want a low value of tau (e.g. 0.1), and so if I want the results expected of this heuristically 
@@ -351,6 +348,50 @@ def softmax(arms: list, tau: float, timesteps: int = 1) -> list:
 
 			N[a] = N[a] + 1
 			Q[a] = Q[a] + (1 / N[a]) * (reward - Q[a])
+
+			steptotals[t] += reward
+
+	return [total / nruns for total in steptotals]
+
+
+def exp3(arms: list, gamma: float, nsteps: int = 10000, timesteps:int = 1) -> list:
+	"""
+	Exp3 (Exponential Weight Algorithm for Exploration and Exploitation) (Boltzmann Exploration)
+
+	A variant of SoftMax.
+
+	Arm a is chosen at time t with probability p_a(t):
+
+	p_a(t) = (1-\gamma) (w_a(t) / (\sum_{j=1}^k w_j(t))) + (\gamma / k)
+ 	"""
+	global nruns
+
+	env = BanditEnv(arms)
+	steptotals = np.zeros(nsteps)
+
+	for i in range(nruns):
+		print(i, end=" ")  # PROGRESS MODE
+		env.reset(i)
+
+		N = np.zeros(env.k, dtype=int)
+		W = np.ones(env.k)
+
+		for t in range(nsteps):
+			# Exp3 weighted probability distribution for each action.
+			probs = (1 - gamma) * (W / np.sum(W)) + (gamma / env.k)
+			# Categorical draw.
+			# (based on https://stackoverflow.com/a/62875642)
+			cumlt_prob = np.cumsum(probs)
+			a = np.argmax(cumlt_prob > np.random.random())
+
+			rewards: list = env.step(a, timesteps=timesteps)
+
+			# Once timesteps > 1 we need to average the rewards within "rewards".
+			reward = np.mean(rewards)
+
+			N[a] = N[a] + 1
+			estimated_reward = 1.0 * reward / probs[a]
+			W[a] = W[a] * np.exp(estimated_reward * gamma / N[a])
 
 			steptotals[t] += reward
 
