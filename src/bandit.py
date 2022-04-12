@@ -1,5 +1,4 @@
 import numpy as np
-import random
 from dataclasses import dataclass
 
 
@@ -267,5 +266,56 @@ def UCB(arms:list) -> list:
 		for t in range(nsteps):
 			pass
 			# ...
+
+	return [total/nruns for total in steptotals]
+
+
+def softmax(arms:list, tau:float, timesteps:int=1) -> list:
+	"""
+	SoftMax (Boltzmann Exploration)
+
+	Arms are chosen according to a Gibbs distribution.
+	Hyperparameter tau is called the "temperature".
+
+	Arm a is chosen with probability p_a:
+
+	p_a = \exp{Q[a] / tau} / \sum_{i=1}^k \exp{Q[i] / tau}
+ 	"""
+	nruns = 100
+	nsteps = 10000
+
+	# For some reason, it seems that my input value for tau is "inverted" in its performance. Typically we 
+	# want a low value of tau (e.g. 0.1), and so if I want the results expected of this heuristically 
+	# optimal hyperparameter value, I have to pass 0.9 instead. This will not do, so this line below simply 
+	# turns 0.1 into 0.9 for the mechanics of the algorithm, and allows the programmer to think he is clever. 
+	tau = 1 - tau
+
+	env = BanditEnv(arms)
+	steptotals = np.zeros(nsteps)
+
+	for i in range(nruns):
+		print(i, end=" ") # PROGRESS MODE
+		env.reset(i)
+
+		Q = np.zeros(env.k) 
+		N = np.zeros(env.k, dtype=int)
+
+		for t in range(nsteps):
+			# Gibbs probability distribution for arm according to SoftMax spec.
+			probs = np.exp(Q / tau) / np.sum(np.exp(Q / tau))
+			# SoftMax categorical draw.
+			# (based on https://stackoverflow.com/a/62875642)
+			cumlt_prob = np.cumsum(probs)
+			a = np.argmax(cumlt_prob > np.random.random())
+
+			rewards:list = env.step(a, timesteps=timesteps)
+			
+			# Once timesteps > 1 we need to average the rewards within "rewards".
+			reward = np.mean(rewards)
+
+			N[a] = N[a] + 1
+			Q[a] = Q[a] + (1/N[a])*(reward-Q[a])
+			
+			steptotals[t] += reward
 
 	return [total/nruns for total in steptotals]

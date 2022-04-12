@@ -188,7 +188,6 @@ requirements under these constrained conditions.
 %-------------------------------------------------------------------------
 % Algorithms we will use and develop (e.g. eps-greedy, UCB, and more). Implementation details, pseudocode here.
 \section{Approach}
-% Various algorithms will be considered, starting with epsilon-greedy and UCB (upper confidence bound). More complex bandit algorithms are considered as well.
 
 % \cite{mab_algos_1} - theoretical guarantees vs practical results of algorithms.
 
@@ -209,6 +208,9 @@ In addition, $\varepsilon$-decreasing is another $\varepsilon$-greedy variant wh
 completed. More specifically, the probability of exploration at time $t$ is given by $\varepsilon_t = min\{ 1, \frac{\varepsilon_0}{t}\}$ where $\varepsilon > 0$. Values for 
 $\varepsilon_0$ are typically not on the interval $[0,1]$, instead values like $1.0$, $5.0$, and $10.0$ are used \cite{mab_algos}.
 
+SoftMax (also called Boltzmann Exploration) makes action decisions based on \emph{probability matching} methods \cite{mab_algos}. Each arm $a$ of $k$ arms holds an associated 
+probability $p_a = e^{Q_a/\tau}/\sum_{a'}e^{Q_{a'}/\tau}$ where $Q_a$ is the action value associated with action $a$. The hyperparameter of SoftMax is $\tau$, called the 
+\emph{temperature}. It can be varied similar to $\varepsilon$ in $\varepsilon$-greedy.
 
 % More on algos here..
 
@@ -218,7 +220,11 @@ $\varepsilon_0$ are typically not on the interval $[0,1]$, instead values like $
 \subsection{Implementation}
 In order to automate the creation of multiple peers, we devised Algorithm~\ref{alg:alg1} which takes as input a number of peers to generate, and three distributions (with 
 their associated hyperparameters) from which to sample the number of states a peer will have, and each state's mean and standard deviation reward. Each state requires a 
-mean and standard deviation because rewards are generated using a normal distribution.
+mean and standard deviation because rewards are generated using a normal distribution. 
+
+Our baseline peer setup for this assessment does not use Algorithm~\ref{alg:alg1}, it is simply a set of 5 single-state peers: $PeerArm(2,1)$, $PeerArm(4,1)$, 
+$PeerArm(6,1)$, $PeerArm(8,1)$, $PeerArm(10,1)$. This simple layout removes the simulated dynamism of multi-state peers, but provides a good baseline evaluation for 
+each algorithm. Later, we use Algorithm~\ref{alg:alg1} to create greater numbers of peers, each of which is more realistic in their transmission speed (reward) variance.
 
 \begin{algorithm}[tb]
     \caption{create\_peers}
@@ -257,8 +263,14 @@ mean and standard deviation because rewards are generated using a normal distrib
 \end{algorithmic}
 \end{algorithm}
 
-The algorithms discussed prior ($\varepsilon$-greedy, $\varepsilon$-first, $\varepsilon$-decreasing, and UCB) are implemented in Python. Each algorithm makes use 
-of a generic $BanditEnv$ environment in order to execute actions and reset the environment after each run. 
+The algorithms discussed prior ($\varepsilon$-greedy, $\varepsilon$-first, $\varepsilon$-decreasing, SoftMax, and UCB) are implemented in Python. POKER was shown 
+by \cite{muMAB_wireless} to have low regret but be unreliable due to high variance, due to these problems, time constraints, and the complexity of the pseudocode included 
+in the paper, we deigned to not cover POKER in our evaluation. Each algorithm makes use of a generic $BanditEnv$ environment in order to execute actions and reset the 
+environment after each run. 
+
+The action value estimates are computed by using a sample-average estimate of action value, with an initial estimate of 0 for each peer. This method does not take 
+advantage of the stochastic state-changing Markov process in each peer, as the agent would have to learn the transition matrix for each peer as well. In the interests of 
+time and leaving some more on the table for further research, we hold to the sample-average estimate method for this study.
 
 By default the algorithms will take an action for 1 time step, but we have added functionality such that it is possible to take more than 1 action, and the end reward 
 for that step is simply the average of rewards received by taking that action for that many time steps. It is important to note that the peer state transitions will 
@@ -275,8 +287,7 @@ of each algorithm in our test environment.
 \subsection{Theoretical Assumptions} 
 The preceding literature made $\varepsilon$-greedy out to be an attractive baseline that fares well for many use cases. We had little expectation for the $\varepsilon$-greedy 
 variants $\varepsilon$-first and $\varepsilon$-decreasing, and expected them to perform somewhat similarly. Algorithms based around UCB were commonly used in related works, 
-and we therefore expected UCB to be stronger than $\varepsilon$-greedy. POKER was shown by \cite{muMAB_wireless} to have low regret but be unreliable due to high variance, 
-due to these problems, time constraints, and the complexity of the pseudocode included in the paper, we deigned to not cover POKER in our evaluation.
+and we therefore expected UCB to be stronger than $\varepsilon$-greedy. SoftMax was expected to be eponymously "softer" than $\varepsilon$-greedy.
 
 % Details on experiments and test results.
 \subsection{Experimental Results} 
