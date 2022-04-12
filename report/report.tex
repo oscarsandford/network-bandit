@@ -30,6 +30,25 @@
 \usepackage{comment}
 \newcommand{\nop}[1]{}
 
+% Listings for code snippets.
+\usepackage{listings}
+\lstset{frame=tb,
+  language=Python,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+
 % The \icmltitle you define below is probably too long as a header.
 % Therefore, a short form for the running title is supplied here:
 \icmltitlerunning{Multi-Armed Bandits for Optimizing New Peers in Peer-to-Peer Networks}
@@ -103,20 +122,21 @@ becomes far more crucial.
 
 In this study, we abstract the new peer scenario described above as a reinforcement learning problem with multi-armed bandits. The multi-armed bandit (MAB) problem 
 involves $k$ slot machines (slot machines are sometimes called one-armed bandits) which pay out reward values according to an internal distribution, of which the agent 
-cannot know. The goal is to pick a strategy to learn which arms pay out the most in order to to maximize total reward over a set number of rounds \cite{mab_algos}. 
+is not aware (note that some MAB variations may relax these constraints). The goal is to pick a strategy to learn which arms pay out the most in order to to maximize 
+total reward over a set number of rounds \cite{mab_algos}. 
 
-Various algorithms to solve the multi-armed bandit problem are considered, and a select few are implemented in order to evaluate their efficacy against this problem. 
+We consider various algorithms to solve the multi-armed bandit problem, and a select few are implemented in order to evaluate their efficacy against this problem. 
 Related literature is surveyed in order to compare our work with solutions to similar problems and verify the validity of our results. Formulation of this challenge 
-as a reinforcement learning problem precedes an explanation of the approach and a discussion of the results. First, a survey of related work concerning the application 
-of multi-armed bandits to computer networking problems.
+as a reinforcement learning problem precedes an explanation of the approach and a discussion of the results. The following section contains a survey of related work 
+concerning the application of multi-armed bandits to computer networking problems.
 
 %-------------------------------------------------------------------------
 % Related work section. Discuss relevant literature.
 \section{Related Work}
 
 Multi-armed bandits serve as a useful abstraction for optimization problems that require decision making with reward outcomes that are initially unknown. In a study 
-concerning cognitive radio networks \cite{qos_selection_mab}, secondary user (SU) nodes select a single channel for information exchange at one time, with no knowledge 
-about channel quality or availability. The authors use a variation on the upper confidence bound (UCB) algorithm, namely QoS-UCB. Their scenario is called "restless", 
+on cognitive radio networks \cite{qos_selection_mab}, secondary user (SU) nodes select a single channel for information exchange at one time, with no knowledge about 
+channel quality or availability. The authors use a variation on the upper confidence bound (UCB) algorithm, namely QoS-UCB. Their scenario is called "restless", 
 meaning that the states of the arms can fluctuate over time, affecting their internal distrubtions and the resulting payouts.
 
 The task of wireless network selection, with the goal of maximizing perceived quality for the end user, is handled by extending the bandit model to be more flexible 
@@ -143,18 +163,19 @@ Similarly Eshcar Hillel \textit{et al}, explore how $k$ players collaborate to i
 once players are able to learn at a rate of $\sqrt{k}$ times faster than a single player \cite{mab_dist_exploration}. This methodology may prove useful as the number of 
 peers within the network fluctuates or quality of service changes. 
 
-Multi-armed bandit problems have been gaining significant attraction, however less effort has been devoting to adapting existing bandit algorithms to specific architectures 
+Multi-armed bandit problems have been gaining significant attraction. However, little effort has been devoted to adapting existing bandit algorithms to specific architectures 
 such as peer-to-peer network environments \cite{gossip_based_distrivuted_stochastic}. This paper successfully implements the $\varepsilon$-greedy stochastic algorithm to a 
-peer-to-peer network environment, scaling with the size of network, achieving a linear speedup in terms of the number of peers and preserving the asymptotic behaviour of the 
-standalone version. They also present a heuristic which has a lower network communication cost which may prove helpful with adapting other related works. Scenarios of 
-distributed clustering have shown to be promising at solving MAB problems within peer-to-peer networks \cite{dist_clustering_p2p}. There are two setups in particular, the 
-first where all peers are solving the same problem and second where a cluster of peers solve the same problem within each cluster. This has shown to achieve an optimal regret 
-rate, defined as the expected difference between the reward sum associated with an optimal strategy and the sum of the collected rewards. We hope to adapt these works within 
-our approach.
+peer-to-peer network environment, scaling with the size of network, achieving a linear speedup in terms of the number of peers, and preserving the asymptotic behaviour of the 
+standalone version. They also present a heuristic which has a lower network communication cost which may prove helpful with adapting other related works. 
+
+Scenarios of distributed clustering have shown to be promising at solving MAB problems within peer-to-peer networks \cite{dist_clustering_p2p}. There are two setups in 
+particular, the first where all peers are solving the same problem and second where a cluster of peers solve the same problem within each cluster. This has shown to achieve 
+an optimal regret rate, defined as the expected difference between the reward sum associated with an optimal strategy and the sum of the collected rewards. 
+%cut: We hope to adapt these works within our approach.
 
 Competition amongst peers is inevitable within the peer-to-peer network environment, especially when peers are trying to stay up to date. Managing this competition can be 
-difficult given its somewhat unpredictable nature. Miao Yang \textit{et al}, develop an online learning policy based on top of a MAB framework to deal with peer competition 
-and delayed feedback \cite{p2p_offloading_with_delayed_feedback}. However, their work is with relation to fog networks (FN), a decentralized computing infrastructure between 
+difficult given its unpredictable nature. Miao Yang \textit{et al}, develop an online learning policy based on top of a MAB framework to deal with peer competition and 
+delayed feedback \cite{p2p_offloading_with_delayed_feedback}. However, their work is with relation to fog networks (FN), a decentralized computing infrastructure between 
 the data source and the cloud. We aim to utilize some of their understandings while tackling the peer-to-peer network scenario. 
 
 The work done within \cite{p2p_net_sender_scheduling} showcases new considerations for not only optimizing data rate transmissions in wireless peer-to-peer networks but also 
@@ -166,18 +187,27 @@ more domain problems are aspiring for optimal performance it is important to rec
 %-------------------------------------------------------------------------
 \section{Problem Formulation}
 
+Although we have so far informally hinted at the application of multi-armed bandits to this problem, this section is devoted to formalizing that congruence.
+
 Consider the setting of a peer-to-peer network wherein a new peer joins with the intent to be brought "up to speed" with the rest of the network as soon as 
 possible (i.e. download all the data in the network from other peers). However, the new peer does not know the network speeds of its seeds, just how much data 
-it receives over time when it chooses a peer and receives data from them for one time step. The reward is how many bytes received in that time slot. We will 
-assume that data packets are UDP datagrams.
+it receives over time when it chooses a peer and receives data from them for one (or more) time step(s). The reward is the average number of bytes received across 
+the number of time steps spent on that action. We will assume that data packets are UDP datagrams.
 
-We want to be careful about defining the reward, because we want the agent to choose the peer that is transmitting the fastest. However, consider that network 
-speeds may change, and the optimal seed to leech from will not always be the best. We call this a "restless" scenario.
+\begin{center}
+    Do not confuse timesteps with steps (or rounds) in the algorithm. Multiple time steps can happen during a single round, because \emph{a step is when the agent makes a 
+decision for a given number of time steps}. We use steps and rounds interchangeably. Keep this distinction in mind in the context of this study.
+\end{center}
+
+The agent should aim to choose the peer that is transmitting the fastest. However, consider that network speeds may change, and the optimal seed to leech from will 
+not always be the best. We call this a "restless" scenario. We simulate these dynamics by assigning each peer a set of possible states, as well as a transition matrix 
+of probabilities to transition from one state to another at every time step. In this sense, every peer is running its own Markov process in the background, irrespective 
+of the agent's action.
 
 This scenario can be solved with a multi-armed bandit approach. Each peer is considered as an "arm" in the multi-armed bandit algorithm. The agent will choose to 
-"pull an arm" and receive reward for a certain number of time steps (by default 1). During every time step, the network dynamics shift, and each arm may transition 
-to another one of its states (regardless of if it was the arm selected or not). Naturally, this creates greater variance in average reward payout, which serves to 
-simulate the noise present in real-world network systems. 
+"pull an arm" and receive reward for a certain number of \emph{time steps} (by default 1). During every time step, the network dynamics shift, and each arm may 
+transition to another one of its states (regardless of if it was the arm selected or not). Naturally, this creates greater variance in average reward payout, which 
+serves to simulate the noise present in real-world network systems. 
 
 Previous studies \cite{multiuser_mab,gossip_based_distrivuted_stochastic,p2p_offloading_with_delayed_feedback} consider peer-to-peer networks where the peers communicate 
 or compete with one another. However, our scenario assumes no information about peers is initially present on the hardware of the new peer, and that transmitting this 
@@ -195,12 +225,13 @@ In this section we briefly outline each algorithm considered, and present our ap
 new peer update task within a small set of hyperparameters. The accompanying source code for our work is maintained on 
 GitHub\footnote{https://github.com/oscarsandford/network-bandit}.
 
-\subsection{Algorithms}
+\subsection{Algorithms} \label{sec:algos}
+
 The most common baseline algorithm applied to multi-armed bandit problems is called $\varepsilon$-greedy. $\varepsilon$-greedy takes a single hyperparameter $\varepsilon$ 
 that dictates the probability of exploration (i.e. choosing a random arm from the possible selections), with $1-\varepsilon$ being the probability of choosing the optimal 
-arm based on the average rewards so far. We will employ $\varepsilon$-greedy, as well as some of its variants in this study. 
+arm based on the average rewards so far. We make use of $\varepsilon$-greedy, as well as some of its variants in this study. 
 
-Firstly, $\varepsilon$-first is an $\varepsilon$-greedy strategy where only exploration is done for the first $T \cdot \varepsilon$ rounds, and pure exploitation 
+Firstly, $\varepsilon$-first is an $\varepsilon$-greedy strategy where only exploration is done for the first $T\varepsilon$ rounds, and pure exploitation 
 is done during the remaining rounds. $T$ is the number of rounds (also called steps) per run \cite{mab_algos}. This forced exploration means peak rewards will be delayed, 
 but more learning is attained as a result.
 
@@ -209,26 +240,25 @@ completed. More specifically, the probability of exploration at time $t$ is give
 $\varepsilon_0$ are typically not on the interval $[0,1]$, instead values like $1.0$, $5.0$, and $10.0$ are used \cite{mab_algos}.
 
 SoftMax (also called Boltzmann Exploration) makes action decisions based on \emph{probability matching} methods \cite{mab_algos}. Each arm $a$ of $k$ arms holds an associated 
-probability $p_a = e^{Q_a/\tau}/\sum_{a'}e^{Q_{a'}/\tau}$ where $Q_a$ is the action value associated with action $a$. The hyperparameter of SoftMax is $\tau$, called the 
-\emph{temperature}. It can be varied similar to $\varepsilon$ in $\varepsilon$-greedy.
+probability $p_a = e^{Q_a/\tau}/\sum_{a'}e^{Q_{a'}/\tau}$ where $Q_a$ is the estimated action value associated with action $a$. The hyperparameter of SoftMax is $\tau$, called 
+the \emph{temperature}. It can be varied similar to $\varepsilon$ in $\varepsilon$-greedy.
 
-Exp3 is a variant of SoftMax, using the idea of Boltzmann Exploration and probability matching \cite{mab_algos}. Each arm $a$ of $k$ arms has an associated probability of 
-being pulled at time $t$, $p_a(t) = (1-\gamma) \frac{w_a(t)}{\sum_{j=1}^k w_j(t)} + \frac{\gamma}{k}$. The single hyperparameter $\gamma$ indicates the learning 
-rate. The weights associated with each action $a$ at time $t$ are noted $w_a(t)$.
+Exp3 is a variant of SoftMax, using the idea of Boltzmann Exploration and probability matching \cite{mab_algos}. Each arm $a$ of $k$ arms has an associated probability 
+$p_a(t) = (1-\gamma) \frac{w_a(t)}{\sum_{j=1}^k w_j(t)} + \frac{\gamma}{k}$ of being pulled at time $t$. The single hyperparameter $\gamma$ indicates the learning 
+rate. The weights associated with each action $a$ at time $t$ are denoted $w_a(t)$.
 
 % More on algos here..
 
 % UCB (and UCB1)
+
+POKER was shown by \cite{muMAB_wireless} to have low regret but be unreliable due to high variance, due to these problems, time constraints, and the complexity of the 
+pseudocode included in the paper, we deigned to not cover POKER in our evaluation.
 
 
 \subsection{Implementation}
 In order to automate the creation of multiple peers, we devised Algorithm~\ref{alg:alg1} which takes as input a number of peers to generate, and three distributions (with 
 their associated hyperparameters) from which to sample the number of states a peer will have, and each state's mean and standard deviation reward. Each state requires a 
 mean and standard deviation because rewards are generated using a normal distribution. 
-
-Our baseline peer setup for this assessment does not use Algorithm~\ref{alg:alg1}, it is simply a set of 5 single-state peers we call $baseline$: $PeerArm(2,1)$, $PeerArm(4,1)$, 
-$PeerArm(6,1)$, $PeerArm(8,1)$, $PeerArm(10,1)$. This simple layout removes the simulated dynamism of multi-state peers, but provides a good baseline evaluation for 
-each algorithm. Later, we use Algorithm~\ref{alg:alg1} to create greater numbers of peers, each of which is more realistic in their transmission speed (reward) variance.
 
 \begin{algorithm}[tb]
     \caption{create\_peers}
@@ -267,55 +297,96 @@ each algorithm. Later, we use Algorithm~\ref{alg:alg1} to create greater numbers
 \end{algorithmic}
 \end{algorithm}
 
-The algorithms discussed prior ($\varepsilon$-greedy, $\varepsilon$-first, $\varepsilon$-decreasing, SoftMax, and UCB) are implemented in Python. POKER was shown 
-by \cite{muMAB_wireless} to have low regret but be unreliable due to high variance, due to these problems, time constraints, and the complexity of the pseudocode included 
-in the paper, we deigned to not cover POKER in our evaluation. Each algorithm makes use of a generic $BanditEnv$ environment in order to execute actions and reset the 
-environment after each run. 
+Our baseline peer setup for this assessment does not use Algorithm~\ref{alg:alg1}, it is simply a set of 5 single-state peers we call $base5$: $PeerArm(2,1)$, $PeerArm(4,1)$, 
+$PeerArm(6,1)$, $PeerArm(8,1)$, $PeerArm(10,1)$. This simple layout removes the simulated dynamism of multi-state peers, but provides a good baseline evaluation for 
+each algorithm. 
+
+This second set of peers, called $gen10$ uses Algorithm~\ref{alg:alg1} to create 10 peers using the specification below, each of which is more realistic in their transmission 
+speed (reward) variance than $base5$.
+\begin{lstlisting}
+gen10 = create_peers(10, 
+    np.random.poisson, dict(lam=5.0), 
+    np.random.normal, dict(loc=10.0, scale=1.5), 
+    np.random.normal, dict(loc=0.5, scale=0.1))
+\end{lstlisting}
+
+The algorithms discussed in section \ref{sec:algos} are implemented in Python and analyzed using a Jupyter Notebook. Each algorithm makes use of a generic $BanditEnv$ 
+environment in order to execute actions and reset the environment after each run. 
 
 The action value estimates are computed by using a sample-average estimate of action value, with an initial estimate of 0 for each peer. This method does not take 
 advantage of the stochastic state-changing Markov process in each peer, as the agent would have to learn the transition matrix for each peer as well. In the interests of 
-time and leaving some more on the table for further research, we hold to the sample-average estimate method for this study.
+time and leaving some more on the table for further research, we stick to the sample-average estimate method for this study.
 
-By default the algorithms will take an action for 1 time step, but we have added functionality such that it is possible to take more than 1 action, and the end reward 
-for that step is simply the average of rewards received by taking that action for that many time steps. It is important to note that the peer state transitions will 
-continue to be active for each time step. That is, the agent cannot "lock" the network state by taking an action for several time steps. 
+By default the MAB algorithms will take an action for 1 time step, but we have added functionality such that it is possible to take more than 1 action, and the end reward 
+for that step is simply the average of rewards received by taking that action for that many time steps. Recall that peers' state transitions will continue to be active 
+for each time step. That is, the agent cannot "lock" the network state by taking an action for several time steps. 
 
 %----------------------------------------------------------------------------------
 % Use of implementation to produce results. Graphs here.
 \section{Results}
-Each algorithm completes 100 runs, with a fixed number of steps each. The number of steps relates to how long the peer will be receiving data from its peers. It will be worth 
-to consider how each algorithm fares in the short and long-term. To this end, we vary the number of steps in our experiments in order to better visualize this disparity.
+Each algorithm completes 100 runs, with a fixed number of steps each. The number of steps relates to how long the peer will be receiving data from its peers. This number is 
+varied in order to visualize the algorithmic performance in the short- and long-term. 
 
 The average reward for each step is averaged across 100 runs, and each of these averages is plotted across the number of steps. In the following two subsections, we briefly 
-discuss preliminary assumptions regarding the results, and then present plots containing visually definitive evaluations of each algorithm in our test environment.
+discuss our prior assumptions on the results, and then present plots containing visually definitive evaluations of each algorithm in our test environment.
 
 % What results we expect? Include assumptions and proof sketches.
 \subsection{Theoretical Assumptions} 
 The preceding literature made $\varepsilon$-greedy out to be an attractive baseline that fares well for many use cases. We had little expectation for the $\varepsilon$-greedy 
 variants $\varepsilon$-first and $\varepsilon$-decreasing, and expected them to perform somewhat similarly. Algorithms based around UCB were commonly used in related works, 
-and we therefore expected UCB to be stronger than $\varepsilon$-greedy. SoftMax was expected to be eponymously "softer" than $\varepsilon$-greedy. Exp3 was expected to be 
-similar to SoftMax due to it being derivative of the SoftMax probability drawing method.
+and we therefore expected UCB to be stronger than $\varepsilon$-greedy. SoftMax was expected to be eponymously "softer" than $\varepsilon$-greedy, and approach its maximum 
+slower but have less variance. Exp3 was expected to be similar to SoftMax due to it being derivative of the SoftMax probability drawing method.
 
 % Details on experiments and test results.
 \subsection{Experimental Results} 
-Text here.
-% Start with baseline 5 peers.
+
+Figure \ref{fig:base5_1ts_1000step_5algos} shows the general performance of each algorithm when it comes to the set of static peers, $base5$.
+% base5 peers. Timesteps=1
 \begin{figure}[h]
     \centering
-    \includegraphics[width=1\linewidth]{Figures/base5peers_1000step_5algos.png}
-    \caption{Average reward over time for each algorithm over 1000 steps using $baseline$ peers.}
-    \label{fig:base5peers_1000step_5algos}
+    \includegraphics[width=1\linewidth]{figs/base5_1ts_1000step_5algos.png}
+    \caption{Average reward over time for each algorithm over 1000 steps using the $base5$ peers with 1 time step per action.}
+    \label{fig:base5_1ts_1000step_5algos}
 \end{figure}
 
-% Then n=10 gen peers.
+Figure \ref{fig:gen10_1ts_1000step_5algos} uses the dynamic $gen10$ peer set. Exp3 seems to peak higher than SoftMax compared to Figure \ref{fig:base5_1ts_1000step_5algos}, 
+but then decays to below SoftMax's performance. The other algorithms have similar performance, althought it seems that UCB suffers slightly in the stochastic scenario. 
+% gen10 peers. Timesteps=1
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\linewidth]{figs/gen10_1ts_1000step_5algos.png}
+    \caption{Average reward over time for each algorithm over 1000 steps using $gen10$ peers with 1 time step per action.}
+    \label{fig:gen10_1ts_1000step_5algos}
+\end{figure}
 
-% Then n=25 gen peers.
+Cranking the time steps to 20 (the amount of time steps the agent will dedicate to a particular peer) shows a sufficient reduction in the variance of SoftMax and Exp3 in 
+Figure \ref{fig:gen10_20ts_1000step_5algos}. However, it is also worth noting that the overall average reward peaks lower for each algorithm, compared to 
+Figure \ref{fig:gen10_1ts_1000step_5algos}, with 1 time step per action.
+% gen10 peers. Timesteps=20
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\linewidth]{figs/gen10_20ts_1000step_5algos.png}
+    \caption{Average reward over time for each algorithm over 1000 steps using $gen10$ peers with 20 time steps per action.}
+    \label{fig:gen10_20ts_1000step_5algos}
+\end{figure}
 
-% Does softmax eventually overtake eps-greedy? Baseline 5 peers case vs. n=10 gen peers case.
+% Then n=25 gen peers. (?)
+
+Based on the results in Figure \ref{fig:base5_1ts_1000step_5algos}, we wanted to find out if SoftMax would ever overtake $\varepsilon$-greedy. In 
+Figure \ref{fig:base5_1ts_40000step_eps_sm} we see that SoftMax eventually stabilizes higher than $varepsilon$-greedy, and with lower variance.
+% Does softmax eventually overtake eps-greedy? base5 peers case vs. n=10 gen peers case.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\linewidth]{figs/base5_1ts_40000step_eps-g_softmax.png}
+    \caption{Average reward over time for $\varepsilon$-greedy and SoftMax over 40000 steps using $base5$ peers with 1 time step per action.}
+    \label{fig:base5_1ts_40000step_eps_sm}
+\end{figure}
 
 %-------------------------------------------------------------------------------
 % Discussion on results. Pros and cons of suggested solution compared with existing solutions. 
 \section{Discussion}
+
+% UCB is insanely good. SoftMax and Exp3 have some interesting short/long term tradeoffs.
 
 Text here.
 
