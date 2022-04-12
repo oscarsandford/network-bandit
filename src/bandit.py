@@ -41,7 +41,7 @@ class PeerArm:
 	>>> arm.states[i].mean
 	>>> arm.states[i].sd
 	"""
-	
+
 	def __init__(self, means, sds=None, transmat=None):
 		if isinstance(means, list):
 			num_states = len(means)
@@ -55,23 +55,27 @@ class PeerArm:
 			sds = [float(sds)]
 
 		if len(sds) < num_states:
-			sds += [0.] * (num_states-len(sds))
+			sds += [0.] * (num_states - len(sds))
 
-		assert isinstance(means, list) and isinstance(sds, list) and len(means) == len(sds), "PeerArm: either means or sds is not a list, or they are and their lengths differ."
+		assert isinstance(means, list) and isinstance(sds, list) and len(means) == len(
+			sds), "PeerArm: either means or sds is not a list, or they are and their lengths differ."
 
 		self.states = [State(float(means[i]), float(sds[i])) for i in range(num_states)]
-		
+
 		if transmat is None:
 			# Unspecified transmat means each state always transitions to itself. We can change this later if needed.
 			self.transmat = np.eye(num_states)
 		else:
-			assert len(transmat.shape) == 2 and transmat.shape[0] == transmat.shape[1], "PeerArm: transmat must be two-dimension, and dimensions must be equal." 
-			assert transmat.shape[0] == num_states, "PeerArm: transmat first dimension must equal number of peer states."
+			assert len(transmat.shape) == 2 and transmat.shape[0] == transmat.shape[
+				1], "PeerArm: transmat must be two-dimension, and dimensions must be equal."
+			assert transmat.shape[
+					   0] == num_states, "PeerArm: transmat first dimension must equal number of peer states."
 			self.transmat = transmat
 
-		assert all([np.isclose(sum(self.transmat[i]), 1.0) for i in range(num_states)]), "PeerArm: a transmat row does not sum close to 1.0."
+		assert all([np.isclose(sum(self.transmat[i]), 1.0) for i in
+					range(num_states)]), "PeerArm: a transmat row does not sum close to 1.0."
 
-		self.current_state:int = 0
+		self.current_state: int = 0
 
 	def reset(self):
 		"""
@@ -91,7 +95,9 @@ What kind of environment layouts do we want? (i.e. number of peers, how many are
 
 """
 
-def create_peers(npeers:int, nstates_dist_fn, nstates_dist_params:dict, mean_dist_fn, mean_dist_params:dict, sd_dist_fn, sd_dist_params:dict) -> list:
+
+def create_peers(npeers: int, nstates_dist_fn, nstates_dist_params: dict, mean_dist_fn, mean_dist_params: dict,
+				 sd_dist_fn, sd_dist_params: dict) -> list:
 	"""
 	A function to automate creating a bunch of peers.
 
@@ -116,18 +122,19 @@ def create_peers(npeers:int, nstates_dist_fn, nstates_dist_params:dict, mean_dis
 			sd = sd_dist_fn(**sd_dist_params)
 			means.append(mean)
 			sds.append(abs(sd))
-		
+
 		# Create transmat with random transition probabilities. (Optional?)
 		transmat = np.zeros((nstates, nstates))
 		for i in range(nstates):
 			row = np.array([np.random.random() for _ in range(nstates)])
-			row = row/np.sum(row)
+			row = row / np.sum(row)
 			transmat[i] = row
-		
+
 		peer = PeerArm(means, sds, transmat)
 		peers.append(peer)
 
 	return peers
+
 
 """
 
@@ -135,40 +142,42 @@ ENVIRONMENT
 
 """
 
+
 class BanditEnv:
 	"""
 	Create a bandit environment given a list of PeerArms.
 	Contains methods to simulate the environment and return 
 	peer-arm info.
 	"""
-	def __init__(self, arms:list):
+
+	def __init__(self, arms: list):
 		self.k = len(arms)
 		self.arms = arms
 
-	def reset(self, seed:int):
+	def reset(self, seed: int):
 		np.random.seed(seed)
 		# Reset current arm states to their initial state.
 		for arm in self.arms:
 			arm.reset()
 
-	def step(self, action:int, timesteps:int=1) -> list:
+	def step(self, action: int, timesteps: int = 1) -> list:
 		"""
 		Pull from a peer (arm) for timestep time. The reward is the
 		total bytes the peer "receives" from this selection operation.
 		Generate reward and then flip arm states for `timestep` times.
 		"""
 		assert -1 < action < self.k, "BanditEnv: invalid action."
-		arm = self.arms[action] 
+		arm = self.arms[action]
 		rewards = []
-		
+
 		# For each timestep, generate reward and transition all arms, because 
 		# we are still moving through time, so the environment must change.
 		for _ in range(timesteps):
-			
+
 			# Generating the rewards.
 			reward = np.random.normal(arm.states[arm.current_state].mean, arm.states[arm.current_state].sd)
 			rewards.append(reward)
-			
+
 			# Flipping the arm states for each time step.
 			for a in self.arms:
 				rand_state = np.random.choice(len(a.states), 1, p=list(a.transmat[a.current_state]))[0]
@@ -176,10 +185,8 @@ class BanditEnv:
 
 		return rewards
 
-
 	def __repr__(self) -> str:
 		return "bandit"
-
 
 
 """
@@ -188,7 +195,8 @@ ALGORITHMS
 
 """
 
-def epsilon(strategy:str, arms:list, eps:float, timesteps:int=1) -> list:
+
+def epsilon(strategy: str, arms: list, eps: float, timesteps: int = 1) -> list:
 	"""
 	Epsilon-greedy and its variants: epsilon-first and epsilon-decreasing.
 
@@ -206,12 +214,12 @@ def epsilon(strategy:str, arms:list, eps:float, timesteps:int=1) -> list:
 
 	env = BanditEnv(arms)
 	steptotals = np.zeros(nsteps)
-	
+
 	for i in range(nruns):
-		print(i, end=" ") # PROGRESS MODE
+		print(i, end=" ")  # PROGRESS MODE
 		env.reset(i)
 
-		Q = np.zeros(env.k) 
+		Q = np.zeros(env.k)
 		N = np.zeros(env.k, dtype=int)
 
 		for t in range(nsteps):
@@ -223,8 +231,8 @@ def epsilon(strategy:str, arms:list, eps:float, timesteps:int=1) -> list:
 			elif strategy == "eps-decreasing":
 				# Epsilon-decreasing: Given the initial eps, divide by the 
 				# current t+1 value to avoid division by zero.
-				do_explore = np.random.random() < (eps / (t+1))
-			else: 
+				do_explore = np.random.random() < (eps / (t + 1))
+			else:
 				# Epsilon-greedy: Explore with probability eps, else greedy.
 				do_explore = np.random.random() < eps
 
@@ -232,22 +240,27 @@ def epsilon(strategy:str, arms:list, eps:float, timesteps:int=1) -> list:
 				a = np.random.choice(env.k)
 			else:
 				a = np.argmax(Q)
-			
-			rewards:list = env.step(a, timesteps=timesteps)
-			
+
+			rewards: list = env.step(a, timesteps=timesteps)
+
 			# Once timesteps > 1 we need to average the rewards within "rewards".
 			reward = np.mean(rewards)
 
 			N[a] = N[a] + 1
-			Q[a] = Q[a] + (1/N[a])*(reward-Q[a])
-			
+			Q[a] = Q[a] + (1 / N[a]) * (reward - Q[a])
+
 			steptotals[t] += reward
-		
-	return [total/nruns for total in steptotals]
+
+	return [total / nruns for total in steptotals]
 
 
-def UCB(arms:list) -> list: 
+def UCB(arms: list, C: float = 1, timesteps: int = 1) -> list:
 	"""
+	arms: list<PeerArm>  _ A list of PeerArm objects used in initializing the environment.
+	C: float             _ Controls the degree of exploration. C > 0. Defaults to 1.
+	timesteps: int       _ The number of time steps to receive reward from a given arm. Can be made variable over time. 
+							Defaults to 1.
+	
 	Upper Confidence Bound
 	"""
 	nruns = 100
@@ -257,20 +270,41 @@ def UCB(arms:list) -> list:
 	steptotals = np.zeros(nsteps)
 
 	for i in range(nruns):
-		print(i, end=" ") # PROGRESS MODE
+		print(i, end=" ")  # PROGRESS MODE
 		env.reset(i)
 
-		Q = np.zeros(env.k) 
+		Q = np.zeros(env.k)
 		N = np.zeros(env.k, dtype=int)
 
 		for t in range(nsteps):
-			pass
-			# ...
+			# UCB algorithm starts
+			ucb_vals = np.zeros(env.k)
+			a = 0  # default action
 
-	return [total/nruns for total in steptotals]
+			# go through each available action 
+			for action in range(0, env.k):
+				# making sure this action has been selected at least once to avoid divide by 0
+				if (N[action] > 0):
+					ucb_vals[action] = Q[action] + np.sqrt((C * np.log(t)) / N[action])
+				else:
+					ucb_vals[action] = 1e500  # make a large value so it is selected
+
+			a = np.argmax(ucb_vals)  # select the best action
+
+			rewards: list = env.step(a, timesteps=timesteps)
+
+			# Once timesteps > 1 we need to average the rewards within "rewards"
+			reward = np.mean(rewards)
+
+			N[a] = N[a] + 1
+			Q[a] = Q[a] + (1 / N[a]) * (reward - Q[a])
+
+			steptotals[t] += reward
+
+	return [total / nruns for total in steptotals]
 
 
-def softmax(arms:list, tau:float, timesteps:int=1) -> list:
+def softmax(arms: list, tau: float, timesteps: int = 1) -> list:
 	"""
 	SoftMax (Boltzmann Exploration)
 
@@ -294,10 +328,10 @@ def softmax(arms:list, tau:float, timesteps:int=1) -> list:
 	steptotals = np.zeros(nsteps)
 
 	for i in range(nruns):
-		print(i, end=" ") # PROGRESS MODE
+		print(i, end=" ")  # PROGRESS MODE
 		env.reset(i)
 
-		Q = np.zeros(env.k) 
+		Q = np.zeros(env.k)
 		N = np.zeros(env.k, dtype=int)
 
 		for t in range(nsteps):
@@ -308,14 +342,14 @@ def softmax(arms:list, tau:float, timesteps:int=1) -> list:
 			cumlt_prob = np.cumsum(probs)
 			a = np.argmax(cumlt_prob > np.random.random())
 
-			rewards:list = env.step(a, timesteps=timesteps)
-			
+			rewards: list = env.step(a, timesteps=timesteps)
+
 			# Once timesteps > 1 we need to average the rewards within "rewards".
 			reward = np.mean(rewards)
 
 			N[a] = N[a] + 1
-			Q[a] = Q[a] + (1/N[a])*(reward-Q[a])
-			
+			Q[a] = Q[a] + (1 / N[a]) * (reward - Q[a])
+
 			steptotals[t] += reward
 
-	return [total/nruns for total in steptotals]
+	return [total / nruns for total in steptotals]
