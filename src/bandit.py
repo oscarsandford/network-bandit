@@ -254,7 +254,7 @@ def epsilon(strategy: str, arms: list, eps: float, timesteps: int = 1) -> list:
 	return [total / nruns for total in steptotals]
 
 
-def UCB(arms: list, C: float = 1, timesteps: int = 1) -> list:
+def UCB(strategy: str, arms: list, C: float = 1, timesteps: int = 1) -> list:
 	"""
 	arms: list<PeerArm>  _ A list of PeerArm objects used in initializing the environment.
 	C: float             _ Controls the degree of exploration. C > 0. Defaults to 1.
@@ -284,8 +284,10 @@ def UCB(arms: list, C: float = 1, timesteps: int = 1) -> list:
 			# go through each available action 
 			for action in range(0, env.k):
 				# making sure this action has been selected at least once to avoid divide by 0
-				if (N[action] > 0):
-					ucb_vals[action] = Q[action] + np.sqrt((C * np.log(t)) / N[action])
+				if N[action] > 0 and strategy == "UCB":
+					ucb_vals[action] = Q[action] + C * (np.sqrt(np.log(t) / N[action]))
+				elif N[action] > 0 and strategy == "UCB-1":
+					ucb_vals[action] = Q[action] + C * (np.sqrt((2 * np.log(t)) / N[action]))
 				else:
 					ucb_vals[action] = 1e500  # make a large value so it is selected
 
