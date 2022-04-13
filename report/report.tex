@@ -256,6 +256,9 @@ pseudocode included in the paper, we deigned to not cover POKER in our evaluatio
 
 
 \subsection{Implementation}
+Our baseline peer setup for this assessment is simply a set of 5 single-state peers we call $base5$: $PeerArm(2,1)$, $PeerArm(4,1)$, $PeerArm(6,1)$, $PeerArm(8,1)$, 
+$PeerArm(10,1)$. This simple layout removes the simulated dynamism of multi-state peers, but provides a good baseline evaluation for each algorithm. 
+
 In order to automate the creation of multiple peers, we devised Algorithm~\ref{alg:alg1} which takes as input a number of peers to generate, and three distributions (with 
 their associated hyperparameters) from which to sample the number of states a peer will have, and each state's mean and standard deviation reward. Each state requires a 
 mean and standard deviation because rewards are generated using a normal distribution. 
@@ -297,11 +300,7 @@ mean and standard deviation because rewards are generated using a normal distrib
 \end{algorithmic}
 \end{algorithm}
 
-Our baseline peer setup for this assessment does not use Algorithm~\ref{alg:alg1}, it is simply a set of 5 single-state peers we call $base5$: $PeerArm(2,1)$, $PeerArm(4,1)$, 
-$PeerArm(6,1)$, $PeerArm(8,1)$, $PeerArm(10,1)$. This simple layout removes the simulated dynamism of multi-state peers, but provides a good baseline evaluation for 
-each algorithm. 
-
-This second set of peers, called $gen10$ uses Algorithm~\ref{alg:alg1} to create 10 peers using the specification below, each of which is more realistic in their transmission 
+The $gen10$ set of peers uses Algorithm~\ref{alg:alg1} to create 10 peers using the specification below, each of which is more realistic in their transmission 
 speed (reward) variance than $base5$.
 \begin{lstlisting}
 gen10 = create_peers(10, 
@@ -373,13 +372,21 @@ Figure \ref{fig:gen10_1ts_1000step_5algos}, with 1 time step per action.
 % Then n=25 gen peers. (?)
 
 Based on the results in Figure \ref{fig:base5_1ts_1000step_5algos}, we wanted to find out if SoftMax would ever overtake $\varepsilon$-greedy. In 
-Figure \ref{fig:base5_1ts_40000step_eps_sm} we see that SoftMax eventually stabilizes higher than $varepsilon$-greedy, and with lower variance.
+Figure \ref{fig:base5_1ts_40000step_eps_sm} we see that SoftMax eventually stabilizes higher than $\varepsilon$-greedy, and with lower variance.
 % Does softmax eventually overtake eps-greedy? base5 peers case vs. n=10 gen peers case.
 \begin{figure}[h]
     \centering
     \includegraphics[width=1\linewidth]{figs/base5_1ts_40000step_eps-g_softmax.png}
     \caption{Average reward over time for $\varepsilon$-greedy and SoftMax over 40000 steps using $base5$ peers with 1 time step per action.}
     \label{fig:base5_1ts_40000step_eps_sm}
+\end{figure}
+However, Figure \ref{fig:gen10_1ts_20000step_eps_sm} show that this is not the case for the $gen10$ peers. Even after only 20000 steps, it is clear that SoftMax 
+is not rising above $\varepsilon$-greedy like it was with $base5$. 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\linewidth]{figs/gen10_1ts_20000step_eps-g_softmax.png}
+    \caption{Average reward over time for $\varepsilon$-greedy and SoftMax over 20000 steps using $gen10$ peers with 1 time step per action.}
+    \label{fig:gen10_1ts_20000step_eps_sm}
 \end{figure}
 
 %-------------------------------------------------------------------------------
