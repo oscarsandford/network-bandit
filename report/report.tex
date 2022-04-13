@@ -249,7 +249,14 @@ rate. The weights associated with each action $a$ at time $t$ are denoted $w_a(t
 
 % More on algos here..
 
-% UCB (and UCB1)
+UCB and slight alterations of UCB were used in many of the previously mentioned works. Given its popularity and excellent results we hoped it would also perform well within 
+our environment setting. Instead of selecting actions based on probabilities UCB (Upper Confidence Bound) alters its exploration and exploitation as it gathers information 
+about the environment. When an action has been tried the least is will be prioritized during the exploration phase, but once these are know it will exploit the 
+action with the highest estimated reward. This action selection is derived from the following: $A_t = argmax_a \left[Q_t(a) + C \sqrt{\log{t} N_t(a)}\right]$ where 
+$Q_t(a)$ is the estimated value of action $a$ at time $t$, $C$ is a confidence value that controls the level of exploration, and $N_t(a)$ is the number of times 
+action $a$ has been selected prior to time $t$. $Q_t(a)$ is the exploitation part of the equation, while the second half handles the level of exploration also controlled by
+the hyperparameter $C$. UCB-1 slightly alters the default algorithm by including a constant of 2 being multiplied by the $\log{t}$ as such, $A_t = argmax_a 
+\left[Q_t(a) + C \sqrt{2*\log{t} N_t(a)}\right]$. This is a popular take on the original UCB algorithm that we thought to include to see how they may differ in our implementation. 
 
 POKER was shown by \cite{muMAB_wireless} to have low regret but be unreliable due to high variance, due to these problems, time constraints, and the complexity of the 
 pseudocode included in the paper, we deigned to not cover POKER in our evaluation.
@@ -329,10 +336,13 @@ varied in order to visualize the algorithmic performance in the short- and long-
 The average reward for each step is averaged across 100 runs, and each of these averages is plotted across the number of steps. In the following two subsections, we briefly 
 discuss our prior assumptions on the results, and then present plots containing visually definitive evaluations of each algorithm in our test environment.
 
+Our experiment results also only include UCB and not UCB-1. Due to the similarities in the algorithm structures they produced almost identical results to each other. 
+This was not unexpected and as a means to simplify the comparisons with the other algorithms it was excluded. 
+
 % What results we expect? Include assumptions and proof sketches.
 \subsection{Theoretical Assumptions} 
 The preceding literature made $\varepsilon$-greedy out to be an attractive baseline that fares well for many use cases. We had little expectation for the $\varepsilon$-greedy 
-variants $\varepsilon$-first and $\varepsilon$-decreasing, and expected them to perform somewhat similarly. Algorithms based around UCB were commonly used in related works, 
+variants, $\varepsilon$-first and $\varepsilon$-decreasing, and expected them to perform somewhat similar to each other. Algorithms based around UCB were commonly used in related works, 
 and we therefore expected UCB to be stronger than $\varepsilon$-greedy. SoftMax was expected to be eponymously "softer" than $\varepsilon$-greedy, and approach its maximum 
 slower but have less variance. Exp3 was expected to be similar to SoftMax due to it being derivative of the SoftMax probability drawing method.
 
@@ -380,6 +390,7 @@ Figure \ref{fig:base5_1ts_40000step_eps_sm} we see that SoftMax eventually stabi
     \caption{Average reward over time for $\varepsilon$-greedy and SoftMax over 40000 steps using $base5$ peers with 1 time step per action.}
     \label{fig:base5_1ts_40000step_eps_sm}
 \end{figure}
+
 However, Figure \ref{fig:gen10_1ts_20000step_eps_sm} show that this is not the case for the $gen10$ peers. Even after only 20000 steps, it is clear that SoftMax 
 is not rising above $\varepsilon$-greedy like it was with $base5$. 
 \begin{figure}[h]
@@ -394,15 +405,29 @@ is not rising above $\varepsilon$-greedy like it was with $base5$.
 \section{Discussion}
 
 % UCB is insanely good. SoftMax and Exp3 have some interesting short/long term tradeoffs.
+Based on our experiment results we found UCB to perform exceptionally well in each of our test scenarios. This was roughly what we had expected based on our research and 
+findings from the related works, but were still surprised given the few amount of steps it required. Both $\varepsilon$-greedy and $\varepsilon$-forward performed well
+but took many more steps to achieve UCBs performance. $\varepsilon$-forward seems to struggle in the first ~100 steps but then quickly jumps to oscillating around
+the performance of UCB, while $\varepsilon$-greedy more gradually brought itself to under approximating UCB. SoftMax and Exp3 had a few interesting short term and long term
+tradeoffs when compared to the other algorithms. To understand these tradeoffs we directly compared SoftMax to $\varepsilon$-greedy over a larger period of steps than before 
+and altered the number of peers as seen in Figure\ref{fig:base5_1ts_40000step_eps_sm} and Figure\ref{fig:gen10_1ts_20000step_eps_sm}. We were able to identify that although 
+SoftMax does start to rise above $\varepsilon$-greedy, if the number of peers are increased this does not occur. This does give some appeal to SoftMax if we were in a 
+scenario where the number of peers was few and running for an extended time, but this is unlikely. 
 
-Text here.
+% Not sure exactly what else we want to discuss here. Thought I would layout the main information. Unless we want to bring in more details.
 
 %-------------------------------------------------------------------------------
 % What we learned. Future work, takeaways.
 \section{Conclusion and Future Research}
 
-Text here.
+Conclusion: Simple summary of our findings, this may be similar to the discussion section but just more condensed.
 
+What we learned: This could consist of the algorithms we implemented and the other ones discusses. Also should discuss how we had no prior RL experience
+before this class and possibly additional stuff we learned from class.
+
+Future Work: Probably just consists of how we could implement the POKER algorithm and some of the other algorithms in the related works such as the gossip algorithms. Could
+also discuss how increasing the number of peers within the network may change the results of how the algorithm performs. Exploring an environment where there is more stochastic 
+features may also be interesting.
 
 \bibliography{refs}
 \bibliographystyle{icml2021}
