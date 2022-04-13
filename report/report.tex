@@ -103,7 +103,13 @@
 %\printAffiliationsAndNotice{\icmlEqualContribution} % otherwise use the standard text.
 
 \begin{abstract}
-Write this last (fewer than 300 words). The completed document should be 5-9 pages.
+% Write this last (fewer than 300 words). The completed document should be 5-9 pages.
+Pure peer-to-peer networks serve to secure information in a decentralized, distributed topology. The multi-armed bandit (MAB) problem formulation proves to be a useful 
+tool for abstracting the problem of optimizing new peer connections. Based on their use in related works, we survey and evaluate several MAB algorithms (including 
+variants of $\varepsilon$-greedy, UCB, and SoftMax) in the context of identifying the fastest peer to download from during the connection process. UCB and 
+$\varepsilon$-first performed the best at selecting the optimal peer in each of our test scenarios. In a condensed period, SoftMax underperforms in comparison, 
+but eventually overtakes $\varepsilon$-greedy. 
+
 \end{abstract}
 
 %-------------------------------------------------------------------------------
@@ -171,7 +177,6 @@ standalone version. They also present a heuristic which has a lower network comm
 Scenarios of distributed clustering have shown to be promising at solving MAB problems within peer-to-peer networks \cite{dist_clustering_p2p}. There are two setups in 
 particular, the first where all peers are solving the same problem and second where a cluster of peers solve the same problem within each cluster. This has shown to achieve 
 an optimal regret rate, defined as the expected difference between the reward sum associated with an optimal strategy and the sum of the collected rewards. 
-%cut: We hope to adapt these works within our approach.
 
 Competition amongst peers is inevitable within the peer-to-peer network environment, especially when peers are trying to stay up to date. Managing this competition can be 
 difficult given its unpredictable nature. Miao Yang \textit{et al}, develop an online learning policy based on top of a MAB framework to deal with peer competition and 
@@ -219,8 +224,6 @@ requirements under these constrained conditions.
 % Algorithms we will use and develop (e.g. eps-greedy, UCB, and more). Implementation details, pseudocode here.
 \section{Approach}
 
-% \cite{mab_algos_1} - theoretical guarantees vs practical results of algorithms.
-
 In this section we briefly outline each algorithm considered, and present our approach for generating test scenarios and measuring the algorithms' efficacy against the 
 new peer update task within a small set of hyperparameters. The accompanying source code for our work is maintained on 
 GitHub\footnote{https://github.com/oscarsandford/network-bandit}.
@@ -240,14 +243,12 @@ completed. More specifically, the probability of exploration at time $t$ is give
 $\varepsilon_0$ are typically not on the interval $[0,1]$, instead values like $1.0$, $5.0$, and $10.0$ are used \cite{mab_algos}.
 
 SoftMax (also called Boltzmann Exploration) makes action decisions based on \emph{probability matching} methods \cite{mab_algos}. Each arm $a$ of $k$ arms holds an associated 
-probability $p_a = e^{Q_a/\tau}/\sum_{a'}e^{Q_{a'}/\tau}$ where $Q_a$ is the estimated action value associated with action $a$. The hyperparameter of SoftMax is $\tau$, called 
-the \emph{temperature}. It can be varied similar to $\varepsilon$ in $\varepsilon$-greedy.
+probability $p_a = e^{Q_a/\tau}/\sum_{a'}e^{Q_{a'}/\tau}$ where $Q_a$ is the estimated action value associated with action $a$. The hyperparameter of SoftMax is $\tau$, 
+called the \emph{temperature}. It can be varied similar to $\varepsilon$ in $\varepsilon$-greedy.
 
 Exp3 is a variant of SoftMax, using the idea of Boltzmann Exploration and probability matching \cite{mab_algos}. Each arm $a$ of $k$ arms has an associated probability 
 $p_a(t) = (1-\gamma) \frac{w_a(t)}{\sum_{j=1}^k w_j(t)} + \frac{\gamma}{k}$ of being pulled at time $t$. The single hyperparameter $\gamma$ indicates the learning 
 rate. The weights associated with each action $a$ at time $t$ are denoted $w_a(t)$.
-
-% More on algos here..
 
 UCB and slight alterations of UCB were used in many of the previously mentioned works. Given its popularity and excellent results we hoped it would also perform well within 
 our environment setting. Instead of selecting actions based on probabilities UCB (Upper Confidence Bound) alters its exploration and exploitation as it gathers information 
@@ -256,7 +257,8 @@ action with the highest estimated reward. This action selection is derived from 
 $Q_t(a)$ is the estimated value of action $a$ at time $t$, $C$ is a confidence value that controls the level of exploration, and $N_t(a)$ is the number of times 
 action $a$ has been selected prior to time $t$. $Q_t(a)$ is the exploitation part of the equation, while the second half handles the level of exploration also controlled by
 the hyperparameter $C$. UCB-1 slightly alters the default algorithm by including a constant of 2 being multiplied by the $\log{t}$ as such, $A_t = argmax_a 
-\left[Q_t(a) + C \sqrt{2*\log{t} N_t(a)}\right]$. This is a popular take on the original UCB algorithm that we thought to include to see how they may differ in our implementation. 
+\left[Q_t(a) + C \sqrt{2*\log{t} N_t(a)}\right]$. This is a popular take on the original UCB algorithm that we thought to include to see how they may differ in our 
+implementation. 
 
 POKER was shown by \cite{muMAB_wireless} to have low regret but be unreliable due to high variance, due to these problems, time constraints, and the complexity of the 
 pseudocode included in the paper, we deigned to not cover POKER in our evaluation.
@@ -308,7 +310,7 @@ mean and standard deviation because rewards are generated using a normal distrib
 \end{algorithm}
 
 The $gen10$ set of peers uses Algorithm~\ref{alg:alg1} to create 10 peers using the specification below, each of which is more realistic in their transmission 
-speed (reward) variance than $base5$.
+speed (reward) variance than $base5$. We also do similar for 20 peers, naturally labelled $gen20$.
 \begin{lstlisting}
 gen10 = create_peers(10, 
     np.random.poisson, dict(lam=5.0), 
@@ -341,10 +343,11 @@ This was not unexpected and as a means to simplify the comparisons with the othe
 
 % What results we expect? Include assumptions and proof sketches.
 \subsection{Theoretical Assumptions} 
-The preceding literature made $\varepsilon$-greedy out to be an attractive baseline that fares well for many use cases. We had little expectation for the $\varepsilon$-greedy 
-variants, $\varepsilon$-first and $\varepsilon$-decreasing, and expected them to perform somewhat similar to each other. Algorithms based around UCB were commonly used in related works, 
-and we therefore expected UCB to be stronger than $\varepsilon$-greedy. SoftMax was expected to be eponymously "softer" than $\varepsilon$-greedy, and approach its maximum 
-slower but have less variance. Exp3 was expected to be similar to SoftMax due to it being derivative of the SoftMax probability drawing method.
+The preceding literature made $\varepsilon$-greedy out to be an attractive baseline that fares well for many use cases. We had little expectation for the 
+$\varepsilon$-greedy variants, $\varepsilon$-first and $\varepsilon$-decreasing, and expected them to perform somewhat similar to each other. Algorithms based around UCB 
+were commonly used in related works, and we therefore expected UCB to be stronger than $\varepsilon$-greedy. SoftMax was expected to be eponymously "softer" than 
+$\varepsilon$-greedy, and approach its maximum slower but have less variance. Exp3 was expected to be similar to SoftMax due to it being derivative of the SoftMax 
+probability drawing method.
 
 % Details on experiments and test results.
 \subsection{Experimental Results} 
@@ -358,8 +361,21 @@ Figure \ref{fig:base5_1ts_1000step_5algos} shows the general performance of each
     \label{fig:base5_1ts_1000step_5algos}
 \end{figure}
 
+The papers we referenced seem to agree that $\varepsilon$, $\tau$, and $\gamma$ values should be around 0.1. However, we decided to see if stronger exploitation would 
+benefit the learning curve. We noticed that lowering UCB's $C$ hyperparameter did not improve its already strong performance at $C=1$, so we increased it instead. 
+Figure \ref{fig:base5_hps_5algos} uses the $base5$ peers with UCB's $C$ value set to 15.0, and all other algorithm hyperparameters set to 0.01.
+% base5 C=15
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\linewidth]{figs/base5_hps_0.01_UCB.png}
+    \caption{Average reward over time for each algorithm over 1000 steps using the $base5$ peers with 1 time step per action. Different hyperparameters are noted. UCB 
+    uses $C=15$}
+    \label{fig:base5_hps_5algos}
+\end{figure}
+
 Figure \ref{fig:gen10_1ts_1000step_5algos} uses the dynamic $gen10$ peer set. Exp3 seems to peak higher than SoftMax compared to Figure \ref{fig:base5_1ts_1000step_5algos}, 
-but then decays to below SoftMax's performance. The other algorithms have similar performance, althought it seems that UCB suffers slightly in the stochastic scenario. 
+but then decays to below SoftMax's performance. The other algorithms have similar performance, althought it seems that UCB dominance suffers only slightly in stochastic 
+scenarios. 
 % gen10 peers. Timesteps=1
 \begin{figure}[h]
     \centering
@@ -379,8 +395,6 @@ Figure \ref{fig:gen10_1ts_1000step_5algos}, with 1 time step per action.
     \label{fig:gen10_20ts_1000step_5algos}
 \end{figure}
 
-% Then n=25 gen peers. (?)
-
 Based on the results in Figure \ref{fig:base5_1ts_1000step_5algos}, we wanted to find out if SoftMax would ever overtake $\varepsilon$-greedy. In 
 Figure \ref{fig:base5_1ts_40000step_eps_sm} we see that SoftMax eventually stabilizes higher than $\varepsilon$-greedy, and with lower variance.
 % Does softmax eventually overtake eps-greedy? base5 peers case vs. n=10 gen peers case.
@@ -391,13 +405,36 @@ Figure \ref{fig:base5_1ts_40000step_eps_sm} we see that SoftMax eventually stabi
     \label{fig:base5_1ts_40000step_eps_sm}
 \end{figure}
 
-However, Figure \ref{fig:gen10_1ts_20000step_eps_sm} show that this is not the case for the $gen10$ peers. Even after only 20000 steps, it is clear that SoftMax 
-is not rising above $\varepsilon$-greedy like it was with $base5$. 
+However, Figure \ref{fig:gen10_1ts_20000step_eps_sm} shows that this is not the case for the more dynamic $gen10$ peers. Even after only 20000 steps, it is clear that 
+SoftMax is not rising above $\varepsilon$-greedy like it was with $base5$. 
 \begin{figure}[h]
     \centering
     \includegraphics[width=1\linewidth]{figs/gen10_1ts_20000step_eps-g_softmax.png}
     \caption{Average reward over time for $\varepsilon$-greedy and SoftMax over 20000 steps using $gen10$ peers with 1 time step per action.}
     \label{fig:gen10_1ts_20000step_eps_sm}
+\end{figure}
+
+As we have seen, $\varepsilon$-first is capable of competing with UCB in optimal peer selection. In Figure \ref{fig:gen10_eps-f}, we show that extending the exploration 
+proportion for more peers does not present noticeable improvements. We can therefore say that $\varepsilon=0.1$ is a safe heuristic for $\varepsilon$-first, but also that, 
+in this case, more peers introduces a reduction in average reward variance in the exploitation phase.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\linewidth]{figs/gen10_eps-f.png}
+    \includegraphics[width=1\linewidth]{figs/gen20_eps-f.png}
+    \caption{Comparing average reward over time for various $\varepsilon$ values in $\varepsilon$-first using $gen10$ (above) and $gen20$ (below) peers with 1 time step per 
+    action.}
+    \label{fig:gen10_eps-f}
+\end{figure}
+
+However, this reward variance is not evidenced in Figure \ref{fig:gen10-20_UCB_eps-f}, where the variance is the roughly the same for each set of peers. Regardless of this, 
+a consistent observation from Figure \ref{fig:gen10_eps-f} and Figure \ref{fig:gen10-20_UCB_eps-f} indicates that the set with the greater number of peers (all peers in 
+both sets created from the same distributions) attains a higher average reward than the set with fewer peers. This is due to the fact that more peers means more chances for 
+a single peer to be significantly better than the best peer in a set of fewer peers.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\linewidth]{figs/gen10-20_UCB_eps-f.png}
+    \caption{Comparing UCB and $\varepsilon$-first using $gen10$ and $gen20$ peers with 1 time step per action.}
+    \label{fig:gen10-20_UCB_eps-f}
 \end{figure}
 
 %-------------------------------------------------------------------------------
@@ -406,28 +443,46 @@ is not rising above $\varepsilon$-greedy like it was with $base5$.
 
 % UCB is insanely good. SoftMax and Exp3 have some interesting short/long term tradeoffs.
 Based on our experiment results we found UCB to perform exceptionally well in each of our test scenarios. This was roughly what we had expected based on our research and 
-findings from the related works, but were still surprised given the few amount of steps it required. Both $\varepsilon$-greedy and $\varepsilon$-forward performed well
-but took many more steps to achieve UCBs performance. $\varepsilon$-forward seems to struggle in the first ~100 steps but then quickly jumps to oscillating around
-the performance of UCB, while $\varepsilon$-greedy more gradually brought itself to under approximating UCB. SoftMax and Exp3 had a few interesting short term and long term
-tradeoffs when compared to the other algorithms. To understand these tradeoffs we directly compared SoftMax to $\varepsilon$-greedy over a larger period of steps than before 
-and altered the number of peers as seen in Figure\ref{fig:base5_1ts_40000step_eps_sm} and Figure\ref{fig:gen10_1ts_20000step_eps_sm}. We were able to identify that although 
-SoftMax does start to rise above $\varepsilon$-greedy, if the number of peers are increased this does not occur. This does give some appeal to SoftMax if we were in a 
-scenario where the number of peers was few and running for an extended time, but this is unlikely. 
+findings from the related works, but were still surprised given the few amount of steps it required. We can attribute this performance to the selected C value as this 
+controls the level of exploration and exploitation the algorithm experiences. Running UCB with $C=15$ drastically changed the behavior of the algorithm, as expected, and 
+caused the number of steps to increase greatly to achieve a semi-optimal average reward.
 
-% Not sure exactly what else we want to discuss here. Thought I would layout the main information. Unless we want to bring in more details.
+Both $\varepsilon$-greedy and $\varepsilon$-first performed well but took more steps to achieve a similar performance to UCB. $\varepsilon$-first seems to struggle in the 
+first $\sim$100 steps but quickly jumps to oscillating around the performance of UCB, while $\varepsilon$-greedy more gradually brought itself to under approximating UCB. 
+
+SoftMax and Exp3 had some notable short term and long term tradeoffs when compared to the other algorithms. To understand these tradeoffs we directly compared SoftMax to 
+$\varepsilon$-greedy over a larger period of steps than before and altered the number of peers as seen in Figure \ref{fig:base5_1ts_40000step_eps_sm} and 
+Figure \ref{fig:gen10_1ts_20000step_eps_sm}. We were able to identify that although SoftMax does start to rise above $\varepsilon$-greedy, if the number of peers are 
+increased this does not occur. This does give some appeal to SoftMax if we were in a scenario where the number of peers were few and running for an extended time, but this 
+is unlikely. 
 
 %-------------------------------------------------------------------------------
 % What we learned. Future work, takeaways.
 \section{Conclusion and Future Research}
 
-Conclusion: Simple summary of our findings, this may be similar to the discussion section but just more condensed.
+% Conclusion: Simple summary of our findings, this may be similar to the discussion section but just more condensed.
 
-What we learned: This could consist of the algorithms we implemented and the other ones discusses. Also should discuss how we had no prior RL experience
-before this class and possibly additional stuff we learned from class.
+Within our peer-to-peer network environment we were able to explore a number of popular MAB algorithms, each leading to unique results. UCB in particular was the strongest 
+of the bunch, while $\varepsilon$-first was slightly behind due to its startup exploration phase. % is it worth mentioning how the softmax based algs and eps-g greedy did?
+Increasing the number of peers within the network lead to an increase in the average reward value and some correlation may exist as the variance drops as seen in 
+Figure \ref{fig:gen10-20_UCB_eps-f}. This shows promise that our implementation may scale well as the number of peers within the network increases, however additional 
+analysis of this variance relationship should be investiaged. 
 
-Future Work: Probably just consists of how we could implement the POKER algorithm and some of the other algorithms in the related works such as the gossip algorithms. Could
-also discuss how increasing the number of peers within the network may change the results of how the algorithm performs. Exploring an environment where there is more stochastic 
-features may also be interesting.
+% What we learned: This could consist of the algorithms we implemented and the other ones discusses. Also should discuss how we had no prior RL experience
+% before this class and possibly additional stuff we learned from class.
+
+This project was an exciting problem to tackle, especially given that we had no prior experience to the reinforcement learning field. Applying the teachings from our 
+lectures and asssignments allowed us to explore new and relevant algorithms and utilize them to explore a practical research problem. Having the ability to adapt knowledge 
+gained from a class into a tangible project is a fantastic feeling. 
+
+% Future Work: Probably just consists of how we could implement the POKER algorithm, and some of the other algorithms in the related works such as the gossip algorithms. 
+% Could also discuss how increasing the number of peers within the network may change the results of how the algorithm performs. Exploring an environment where there is 
+% more stochastic features may also be interesting.
+
+In the future we hope to implement the aforementioned POKER algorithm, as well as other algorithms surveyed in the related works, such as a gossip-based algorithm. The 
+results from these future experiments would help us better understand how more complex and newer algorithms perform in comparison to these simpler ones. We would also adapt 
+how our environment behaves, hoping to run a simulated peer-to-peer network that would allow for different forms of communication among users. This enables a more realistic 
+stochastic environment which should make the comparison and performance among algorithms a bit more interesting. 
 
 \bibliography{refs}
 \bibliographystyle{icml2021}
